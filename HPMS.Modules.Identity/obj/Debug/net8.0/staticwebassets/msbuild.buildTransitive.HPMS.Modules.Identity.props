@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\buildMultiTargeting\HPMS.Modules.Identity.props" />
-</Project>
