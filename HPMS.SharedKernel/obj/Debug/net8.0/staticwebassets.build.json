@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "x+9zUKprD04dShu4NEbrpO/9ueuVDFWYQzBr79vHsFI=",
+  "Source": "HPMS.SharedKernel",
+  "BasePath": "_content/HPMS.SharedKernel",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

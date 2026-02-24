@@ -1,0 +1,34 @@
+{
+  "Version": 1,
+  "Hash": "Vz+iBt9mKbnaRaIzc/1Co+NTen+uDbiLoEnaOj0KFzc=",
+  "Source": "HPMS.Web",
+  "BasePath": "_content/HPMS.Web",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [
+    {
+      "Identity": "C:\\Users\\muhdt\\OneDrive\\Files\\School Stuff\\Programming Projects\\C#\\HPMS\\HPMS.Modules.Identity\\HPMS.Modules.Identity.csproj",
+      "Version": 2,
+      "Source": "HPMS.Modules.Identity",
+      "GetPublishAssetsTargets": "ComputeReferencedStaticWebAssetsPublishManifest;GetCurrentProjectPublishStaticWebAssetItems",
+      "AdditionalPublishProperties": "Configuration=Debug;Platform=AnyCPU",
+      "AdditionalPublishPropertiesToRemove": "WebPublishProfileFile;TargetFramework",
+      "GetBuildAssetsTargets": "GetCurrentProjectBuildStaticWebAssetItems",
+      "AdditionalBuildProperties": "Configuration=Debug;Platform=AnyCPU",
+      "AdditionalBuildPropertiesToRemove": "WebPublishProfileFile;TargetFramework"
+    },
+    {
+      "Identity": "C:\\Users\\muhdt\\OneDrive\\Files\\School Stuff\\Programming Projects\\C#\\HPMS\\HPMS.SharedKernel\\HPMS.SharedKernel.csproj",
+      "Version": 2,
+      "Source": "HPMS.SharedKernel",
+      "GetPublishAssetsTargets": "ComputeReferencedStaticWebAssetsPublishManifest;GetCurrentProjectPublishStaticWebAssetItems",
+      "AdditionalPublishProperties": "Configuration=Debug;Platform=AnyCPU",
+      "AdditionalPublishPropertiesToRemove": "WebPublishProfileFile;TargetFramework",
+      "GetBuildAssetsTargets": "GetCurrentProjectBuildStaticWebAssetItems",
+      "AdditionalBuildProperties": "Configuration=Debug;Platform=AnyCPU",
+      "AdditionalBuildPropertiesToRemove": "WebPublishProfileFile;TargetFramework"
+    }
+  ],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
