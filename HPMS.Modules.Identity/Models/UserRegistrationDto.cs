@@ -5,5 +5,6 @@ public record UserRegistrationDto(
     string Username, 
     string Email, 
     string Password,
+    int RoleId,
     string FirstName, 
     string LastName);

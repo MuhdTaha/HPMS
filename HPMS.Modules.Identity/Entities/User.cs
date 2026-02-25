@@ -16,6 +16,9 @@ public record User : IHasTenant
     
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
+    
+    public int RoleId { get; set; } // Foreign key to Role entity
+    public Role? Role { get; set; } // Navigation property to Role entity
 
     // Soft delete flag for HIPAA compliance
     public bool IsDeleted { get; set; } = false;
