@@ -3,7 +3,7 @@
 namespace HPMS.Modules.Identity.Entities;
 
 // We use 'public record' for a clean, data-focused class
-public record User : IHasTenant
+public record User : IHasTenant, ISoftDelete
 {
     public Guid Id { get; init; } = Guid.NewGuid();
     
@@ -21,5 +21,5 @@ public record User : IHasTenant
     public Role? Role { get; set; } // Navigation property to Role entity
 
     // Soft delete flag for HIPAA compliance
-    public bool IsDeleted { get; set; } = false;
+    public bool IsDeleted { get; set; }
 }

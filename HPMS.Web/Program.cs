@@ -4,11 +4,12 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 using HPMS.Modules.Identity.Data;
-using HPMS.Modules.Identity.Entities;
-using HPMS.Modules.Identity.DTO;
 using HPMS.Modules.Identity.Endpoints;
 using HPMS.SharedKernel.Interfaces;
 using HPMS.Web.Services;
+using HPMS.Scheduling;
+using HPMS.Scheduling.Data;
+using HPMS.Scheduling.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,8 +21,15 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ITenantProvider, ClaimsTenantProvider>();
 // builder.Services.AddScoped<ITenantProvider, FakeTenantProvider>();
 
+// Add DbContexts for both Identity and Scheduling modules, using the same connection string.
 builder.Services.AddDbContext<IdentityDbContext>(options => 
     options.UseSqlServer(connectionString));
+
+builder.Services.AddDbContext<SchedulingDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
+// Register the appointment conflict service for dependency injection.
+builder.Services.AddScoped<IAppointmentConflictService, AppointmentConflictService>();
 
 // Add Authentication "Guard"
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -74,6 +82,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 var app = builder.Build();
+
 // Enable Swagger UI
 if (app.Environment.IsDevelopment())
 {
@@ -85,5 +94,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapIdentityEndpoints();
+app.MapSchedulingEndpoints();
 
 app.Run();

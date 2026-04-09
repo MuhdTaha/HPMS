@@ -22,9 +22,14 @@ public class IdentityDbContext(
             // Check if the entity implements IHasTenant
             if (typeof(IHasTenant).IsAssignableFrom(entityType.ClrType))
             { 
+                var hasSoftDeleteProperty = entityType.ClrType.GetProperty(nameof(ISoftDelete.IsDeleted)) != null;
+                var filterMethodName = hasSoftDeleteProperty && typeof(ISoftDelete).IsAssignableFrom(entityType.ClrType)
+                    ? nameof(ApplyTenantAndSoftDeleteFilter)
+                    : nameof(ApplyTenantFilter);
+
                 // Call a helper method to apply the filter
                 var method = typeof(IdentityDbContext)
-                    .GetMethod(nameof(ApplyTenantFilter), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                    .GetMethod(filterMethodName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                     ?.MakeGenericMethod(entityType.ClrType);
 
                 method?.Invoke(this, new object[] { modelBuilder });
@@ -68,5 +73,10 @@ public class IdentityDbContext(
     private void ApplyTenantFilter<T>(ModelBuilder modelBuilder) where T : class, IHasTenant
     {
         modelBuilder.Entity<T>().HasQueryFilter(x => x.TenantId == tenantProvider.GetTenantId());
+    }
+
+    private void ApplyTenantAndSoftDeleteFilter<T>(ModelBuilder modelBuilder) where T : class, IHasTenant, ISoftDelete
+    {
+        modelBuilder.Entity<T>().HasQueryFilter(x => x.TenantId == tenantProvider.GetTenantId() && !x.IsDeleted);
     }
 }

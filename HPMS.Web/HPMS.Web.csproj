@@ -20,6 +20,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\HPMS.Modules.Identity\HPMS.Modules.Identity.csproj" />
+      <ProjectReference Include="..\HPMS.Scheduling\HPMS.Scheduling.csproj" />
     </ItemGroup>
 
 </Project>
