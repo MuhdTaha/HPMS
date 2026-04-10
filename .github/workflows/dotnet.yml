@@ -44,11 +44,11 @@ jobs:
         run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore HPMS.sln
 
       - name: Build
-        run: dotnet build --no-restore
-        
+        run: dotnet build HPMS.sln --no-restore
+
       - name: Wait for SQL Server to be ready
         run: |
           echo "Waiting for SQL Server..."
@@ -64,4 +64,4 @@ jobs:
         run: dotnet ef database update --project HPMS.Scheduling/HPMS.Scheduling.csproj --startup-project HPMS.Web/HPMS.Web.csproj --context SchedulingDbContext
 
       - name: Run Tests
-        run: dotnet test --no-build --verbosity normal
+        run: dotnet test HPMS.sln --no-build --verbosity normal
