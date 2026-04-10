@@ -24,6 +24,7 @@ public class AppointmentConflictService(SchedulingDbContext db) : IAppointmentCo
             .AnyAsync(a =>
                 a.ProviderId == providerId &&
                 a.Status != AppointmentStatus.NoShow &&
+                a.Status != AppointmentStatus.Canceled &&
                 (!ignoreAppointmentId.HasValue || a.Id != ignoreAppointmentId.Value) &&
                 start < a.EndTime &&
                 a.StartTime < end,

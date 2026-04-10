@@ -1,0 +1,60 @@
+﻿name: HPMS CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    env:
+      ConnectionStrings__DefaultConnection: "Server=localhost;Database=HPMS_Test;User Id=sa;Password=YourStrong@Password123;TrustServerCertificate=True;"
+      Jwt__Key: "TemporaryKeyForTestingOnly1234567890!"
+      Jwt__Issuer: "HPMS_Backend"
+      Jwt__Audience: "HPMS_Users"
+
+    services:
+      # We spin up a real SQL Server container for your Integration Tests!
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: Y
+          MSSQL_SA_PASSWORD: YourStrong@Password123
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $$MSSQL_SA_PASSWORD -Q 'SELECT 1' -C"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Install dotnet-ef
+        run: dotnet tool install --global dotnet-ef
+
+      - name: Add dotnet tools to PATH
+        run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore
+
+      - name: Apply Identity migrations
+        run: dotnet ef database update --project HPMS.Modules.Identity/HPMS.Modules.Identity.csproj --startup-project HPMS.Web/HPMS.Web.csproj --context IdentityDbContext
+
+      - name: Apply Scheduling migrations
+        run: dotnet ef database update --project HPMS.Scheduling/HPMS.Scheduling.csproj --startup-project HPMS.Web/HPMS.Web.csproj --context SchedulingDbContext
+
+      - name: Run Tests
+        run: dotnet test --no-build --verbosity normal

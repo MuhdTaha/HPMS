@@ -97,3 +97,5 @@ app.MapIdentityEndpoints();
 app.MapSchedulingEndpoints();
 
 app.Run();
+
+public partial class Program { }

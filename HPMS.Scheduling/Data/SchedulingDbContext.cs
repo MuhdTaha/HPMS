@@ -41,6 +41,18 @@ public class SchedulingDbContext(
         }
     }
 
+    public override int SaveChanges()
+    {
+        StampTenantIds();
+        return base.SaveChanges();
+    }
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        StampTenantIds();
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
     // Helper method to apply a global query filter for multi-tenancy on entities that implement IHasTenant.
     private void ApplyTenantFilter<T>(ModelBuilder modelBuilder) where T : class, IHasTenant
     {
@@ -50,5 +62,18 @@ public class SchedulingDbContext(
     private void ApplyTenantAndSoftDeleteFilter<T>(ModelBuilder modelBuilder) where T : class, IHasTenant, ISoftDelete
     {
         modelBuilder.Entity<T>().HasQueryFilter(x => x.TenantId == tenantProvider.GetTenantId() && !x.IsDeleted);
+    }
+
+    private void StampTenantIds()
+    {
+        var currentTenantId = tenantProvider.GetTenantId();
+
+        foreach (var entry in ChangeTracker.Entries<IHasTenant>())
+        {
+            if (entry.State == EntityState.Added && entry.Entity.TenantId == Guid.Empty)
+            {
+                entry.Entity.TenantId = currentTenantId;
+            }
+        }
     }
 }
