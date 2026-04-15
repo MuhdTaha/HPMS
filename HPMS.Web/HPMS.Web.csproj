@@ -19,8 +19,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\HPMS.Modules.Identity\HPMS.Modules.Identity.csproj" />
-      <ProjectReference Include="..\HPMS.Scheduling\HPMS.Scheduling.csproj" />
+        <ProjectReference Include="..\HPMS.Modules.Billing\HPMS.Modules.Billing.csproj" />
+        <ProjectReference Include="..\HPMS.Modules.Identity\HPMS.Modules.Identity.csproj" />
+        <ProjectReference Include="..\HPMS.Scheduling\HPMS.Scheduling.csproj" />
     </ItemGroup>
 
 </Project>

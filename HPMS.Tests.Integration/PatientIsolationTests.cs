@@ -92,7 +92,16 @@ public class PatientIsolationTests(WebApplicationFactory<Program> factory) : Bas
     {
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        var response = await Client.PostAsJsonAsync("/scheduling/patients", new PatientDto(firstName, lastName, dateOfBirth));
+        var response = await Client.PostAsJsonAsync("/scheduling/patients", new PatientDto(
+            firstName,
+            lastName,
+            dateOfBirth,
+            $"{firstName.ToLowerInvariant()}.{lastName.ToLowerInvariant()}@example.com",
+            $"123 {lastName} Street",
+            "+1 (215) 555-1234",
+            Ssn: null,
+            InsuranceNumber: null,
+            EmergencyContact: "Emergency Contact"));
         response.StatusCode.Should().Be(HttpStatusCode.Created);
     }
 

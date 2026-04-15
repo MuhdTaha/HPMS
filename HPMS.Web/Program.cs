@@ -5,11 +5,13 @@ using System.Text;
 
 using HPMS.Modules.Identity.Data;
 using HPMS.Modules.Identity.Endpoints;
+using HPMS.Modules.Billing.Data;
 using HPMS.SharedKernel.Interfaces;
 using HPMS.Web.Services;
 using HPMS.Scheduling;
 using HPMS.Scheduling.Data;
 using HPMS.Scheduling.Services;
+using HPMS.Modules.Billing;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,11 +23,14 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ITenantProvider, ClaimsTenantProvider>();
 // builder.Services.AddScoped<ITenantProvider, FakeTenantProvider>();
 
-// Add DbContexts for both Identity and Scheduling modules, using the same connection string.
+// Add DbContexts for Identity, Scheduling, and Billing modules, using the same connection string.
 builder.Services.AddDbContext<IdentityDbContext>(options => 
     options.UseSqlServer(connectionString));
 
 builder.Services.AddDbContext<SchedulingDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
+builder.Services.AddDbContext<BillingDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 // Register the appointment conflict service for dependency injection.
@@ -46,6 +51,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
         };
     });
+
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssemblies(
+        typeof(Program).Assembly,
+        typeof(SchedulingModule).Assembly,
+        typeof(BillingModule).Assembly
+    );
+});
 
 builder.Services.AddAuthorization();
 builder.Services.AddEndpointsApiExplorer();
@@ -83,6 +97,17 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var identityDb = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
+    var schedulingDb = scope.ServiceProvider.GetRequiredService<SchedulingDbContext>();
+    var billingDb = scope.ServiceProvider.GetRequiredService<BillingDbContext>();
+
+    identityDb.Database.Migrate();
+    schedulingDb.Database.Migrate();
+    billingDb.Database.Migrate();
+}
+
 // Enable Swagger UI
 if (app.Environment.IsDevelopment())
 {
@@ -95,6 +120,7 @@ app.UseAuthorization();
 
 app.MapIdentityEndpoints();
 app.MapSchedulingEndpoints();
+app.MapBillingEndpoints();
 
 app.Run();
 

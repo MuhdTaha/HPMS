@@ -1,11 +1,14 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System.Text.Json;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using HPMS.Scheduling.Data;
 using HPMS.Scheduling.Entities;
 using HPMS.Scheduling.Services;
+using HPMS.SharedKernel.Events;
 using HPMS.SharedKernel.Interfaces;
+using MediatR;
 
 namespace HPMS.Scheduling;
 
@@ -62,6 +65,7 @@ public static class SchedulingModule
         group.MapPatch("/appointments/{id:guid}/status", async (
             Guid id, 
             UpdateAppointmentStatusDto dto, 
+            IMediator mediator,
             SchedulingDbContext db) => 
         {
             // 1. Find the appointment
@@ -72,26 +76,29 @@ public static class SchedulingModule
                 return Results.NotFound();
 
             // 2. Validate the transition (Basic logic)
-            if (appointment.Status == AppointmentStatus.Completed || 
-                appointment.Status == AppointmentStatus.Canceled)
-            {
-                return Results.BadRequest("Cannot change the status of a terminal appointment.");
-            }
-
-            // 3. Update the state
+            var newStatus = (AppointmentStatus)dto.NewStatus;
+            bool isValid = IsValidTransition(appointment.Status, newStatus);
+            
+            if (!isValid)
+                return Results.BadRequest($"Invalid status transition from {appointment.Status} to {newStatus}.");
+            
+            // 3. Update the state if requested transition is valid
             var oldStatus = appointment.Status;
-            appointment.Status = (AppointmentStatus)dto.NewStatus;
+            appointment.Status = newStatus;
 
             // 4. Save changes
             await db.SaveChangesAsync();
 
-            // 5. TODO: Trigger Billing Event if status is 'Completed'
-            if (appointment.Status == AppointmentStatus.Completed)
+            // 5. Trigger Billing Event if status is 'Completed'
+            if (newStatus == AppointmentStatus.Completed)
             {
-                // This is where Phase 3 (Event-Driven Architecture) begins!
+                await mediator.Publish(new AppointmentCompletedEvent(
+                    appointment.Id,
+                    appointment.PatientId,
+                    appointment.TenantId));
             }
 
-            return Results.Ok(new { Message = $"Status updated from {oldStatus} to {appointment.Status}" });
+            return Results.Ok(new { Message = $"Status updated from {oldStatus} to {newStatus}" });
         })
         .WithName("UpdateAppointmentStatus");
 
@@ -129,18 +136,28 @@ public static class SchedulingModule
         // Register a new patient
         group.MapPost("/patients", async (PatientDto dto, SchedulingDbContext db, ITenantProvider tenantProvider) =>
         {
+            var phi = new PatientPhi
+            {
+                Address = dto.Address,
+                Email = dto.Email,
+                PhoneNumber = dto.PhoneNumber,
+                Ssn = dto.Ssn ?? string.Empty,
+                InsuranceNumber = dto.InsuranceNumber ?? string.Empty,
+                EmergencyContact = dto.EmergencyContact ?? string.Empty
+            };
+            
             var patient = new Patient
             {
                 TenantId = tenantProvider.GetTenantId(),
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
                 DateOfBirth = dto.DateOfBirth.ToDateTime(TimeOnly.MinValue),
-                IsDeleted = false // Ensure soft-delete is initialized to false
+                IsDeleted = false, // Ensure soft-delete is initialized to false
+                PHI_Data = JsonSerializer.Serialize(phi) // Encrypt and store PHI as JSON blob
             };
 
             db.Patients.Add(patient);
             await db.SaveChangesAsync();
-
             return Results.Created($"/scheduling/patients/{patient.Id}", patient);
         })
         .WithName("CreatePatient");
@@ -166,5 +183,26 @@ public static class SchedulingModule
         .WithName("DeletePatient");
         
         return endpoints;
+    }
+    
+    public static bool IsValidTransition(AppointmentStatus current, AppointmentStatus next)
+    {
+        return (current, next) switch
+        {
+            // Normal workflow
+            (AppointmentStatus.Scheduled, AppointmentStatus.Arrived)   => true,
+            (AppointmentStatus.Arrived, AppointmentStatus.InSession)   => true,
+            (AppointmentStatus.InSession, AppointmentStatus.Completed) => true,
+
+            // Any non-terminal state can be Canceled or a NoShow
+            (_, AppointmentStatus.Canceled) when current != AppointmentStatus.Completed => true,
+            (_, AppointmentStatus.NoShow)   when current != AppointmentStatus.Completed => true,
+
+            // Allow skipping 'Arrived' for telehealth (Scheduled -> InSession)
+            (AppointmentStatus.Scheduled, AppointmentStatus.InSession) => true,
+
+            // Default: Block all other jumps (e.g., Completed -> Scheduled is forbidden)
+            _ => false
+        };
     }
 }

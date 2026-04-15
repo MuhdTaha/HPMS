@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using HPMS.Scheduling.Entities;
 using HPMS.SharedKernel.Interfaces;
+using HPMS.SharedKernel.Services;
+using HPMS.SharedKernel.Extensions;
 
 namespace HPMS.Scheduling.Data;
 
@@ -16,29 +18,24 @@ public class SchedulingDbContext(
     {
         base.OnModelCreating(modelBuilder);
         
-        // Explicitly configure the RowVersion property on the Appointment entity to be a concurrency token.
+        // Use value converter for name encryption on the Patient entity.
+        var patientEntity = modelBuilder.Entity<Patient>();
+        
+        // 1. Module-Specific: PHI Encryption
+        modelBuilder.Entity<Patient>()
+            .Property(p => p.PHI_Data)
+            .HasConversion(
+                v => EncryptionHelper.Encrypt(v), // Encrypt when saving to DB
+                v => EncryptionHelper.Decrypt(v)  // Decrypt when reading from DB
+            );
+        
+        // 2. Module-Specific: Concurrency
         modelBuilder.Entity<Appointment>()
             .Property(a => a.RowVersion)
             .IsRowVersion();
         
-        // Apply multi-tenant filters to entities that implement IHasTenant.
-        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
-        {
-            // Check if the entity implements IHasTenant and apply a global query filter to ensure tenant isolation.
-            if (typeof(IHasTenant).IsAssignableFrom(entityType.ClrType))
-            {
-                var hasSoftDeleteProperty = entityType.ClrType.GetProperty(nameof(ISoftDelete.IsDeleted)) != null;
-                var filterMethodName = hasSoftDeleteProperty && typeof(ISoftDelete).IsAssignableFrom(entityType.ClrType)
-                    ? nameof(ApplyTenantAndSoftDeleteFilter)
-                    : nameof(ApplyTenantFilter);
-
-                var method = typeof(SchedulingDbContext)
-                    .GetMethod(filterMethodName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                    ?.MakeGenericMethod(entityType.ClrType);
-
-                method?.Invoke(this, new object[] { modelBuilder });
-            }
-        }
+        // 3. Shared: Global Filters (Tenant Isolation + Soft Delete)
+        modelBuilder.ApplyGlobalFilters(tenantProvider);
     }
 
     public override int SaveChanges()
@@ -47,23 +44,32 @@ public class SchedulingDbContext(
         return base.SaveChanges();
     }
 
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    public override Task<int> SaveChangesAsync(CancellationToken ct = default)
     {
-        StampTenantIds();
-        return base.SaveChangesAsync(cancellationToken);
+        ChangeTracker.StampTenantIds(tenantProvider.GetTenantId());
+        return base.SaveChangesAsync(ct);
     }
 
-    // Helper method to apply a global query filter for multi-tenancy on entities that implement IHasTenant.
-    private void ApplyTenantFilter<T>(ModelBuilder modelBuilder) where T : class, IHasTenant
+    // Method to apply a global query filter for tenant isolation and soft deletes.
+    private void ApplyFilters<T>(ModelBuilder modelBuilder) where T : class, IHasTenant
     {
-        modelBuilder.Entity<T>().HasQueryFilter(x => x.TenantId == tenantProvider.GetTenantId());
+        // We check if the class ALSO implements ISoftDelete
+        if (typeof(ISoftDelete).IsAssignableFrom(typeof(T)))
+        {
+            // Apply BOTH Tenant Isolation AND Soft Delete
+            modelBuilder.Entity<T>().HasQueryFilter(x => 
+                x.TenantId == tenantProvider.GetTenantId() && 
+                !((ISoftDelete)x).IsDeleted);
+        }
+        else
+        {
+            // Apply ONLY Tenant Isolation
+            modelBuilder.Entity<T>().HasQueryFilter(x => 
+                x.TenantId == tenantProvider.GetTenantId());
+        }
     }
 
-    private void ApplyTenantAndSoftDeleteFilter<T>(ModelBuilder modelBuilder) where T : class, IHasTenant, ISoftDelete
-    {
-        modelBuilder.Entity<T>().HasQueryFilter(x => x.TenantId == tenantProvider.GetTenantId() && !x.IsDeleted);
-    }
-
+    // Method to stamp TenantIds on new entities before they are saved to the database.
     private void StampTenantIds()
     {
         var currentTenantId = tenantProvider.GetTenantId();

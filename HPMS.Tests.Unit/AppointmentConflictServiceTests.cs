@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using HPMS.Scheduling;
 using HPMS.Scheduling.Data;
 using HPMS.Scheduling.Entities;
 using HPMS.Scheduling.Services;
@@ -12,7 +13,8 @@ public class AppointmentConflictServiceTests
 {
     private readonly SchedulingDbContext _context;
     private readonly AppointmentConflictService _service;
-    private readonly Guid _testTenantId = Guid.NewGuid();
+    // Keep tenant constant across test instances because EF Core caches model/query filters per context type.
+    private static readonly Guid _testTenantId = Guid.Parse("11111111-1111-1111-1111-111111111111");
 
     public AppointmentConflictServiceTests()
     {
@@ -187,5 +189,18 @@ public class AppointmentConflictServiceTests
 
         // Assert: Should be available since the conflict is for a different provider
         result.Should().BeTrue();
+    }
+    
+    [Theory]
+    [InlineData(AppointmentStatus.Scheduled, AppointmentStatus.Arrived, true)]
+    [InlineData(AppointmentStatus.Completed, AppointmentStatus.Scheduled, false)]
+    [InlineData(AppointmentStatus.Scheduled, AppointmentStatus.Canceled, true)]
+    public void StateMachine_ShouldValidateTransitions(AppointmentStatus current, AppointmentStatus next, bool expected)
+    {
+        // Act: Check if the transition is valid according to the state machine rules
+        var result = SchedulingModule.IsValidTransition(current, next);
+
+        // Assert: The result should match the expected outcome based on the defined state machine rules
+        result.Should().Be(expected);
     }
 }

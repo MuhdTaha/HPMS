@@ -4,7 +4,13 @@
 public record PatientDto(
     string FirstName, 
     string LastName, 
-    DateOnly DateOfBirth);
+    DateOnly DateOfBirth,
+    string Email,
+    string Address,
+    string PhoneNumber,
+    string? Ssn = null,
+    string? InsuranceNumber = null,
+    string? EmergencyContact = null);
 
 // Used when a Front Desk user books a new slot
 public record CreateAppointmentDto(
