@@ -1,0 +1,165 @@
+:host {
+	display: block;
+	min-height: 90dvh;
+}
+
+.login-body {
+	min-height: 100dvh;
+	display: grid;
+	place-items: center;
+	padding: 1.5rem;
+	background: radial-gradient(circle at top left, #1e3a2a 0%, #0f172a 42%, #020617 100%);
+}
+
+.login-card {
+	width: 100%;
+	max-width: 550px; /* Wider card for a more professional look */
+    height: 95%; /* Full viewport height for a centered look */
+	border-radius: 1.5rem;
+	padding: 3.5rem 3rem 3rem; /* Top padding leaves room for floating tabs */
+	background: rgba(15, 23, 42, 0.9);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	border-top: 4px solid #22c55e;
+	backdrop-filter: blur(10px);
+	position: relative;
+	overflow: visible;
+}
+
+.auth-tabs {
+	position: absolute;
+	top: 0;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.35rem;
+	border-radius: 999px;
+	background: rgba(2, 6, 23, 0.95);
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+	z-index: 20;
+}
+
+.auth-tab {
+	text-decoration: none;
+	padding: 0.55rem 1.15rem;
+	border-radius: 999px;
+	color: #cbd5e1;
+	font-size: 0.95rem;
+	font-weight: 600;
+	line-height: 1;
+	transition: background-color 0.2s ease, color 0.2s ease;
+	cursor: pointer;
+}
+
+.auth-tab:hover {
+	background: rgba(148, 163, 184, 0.14);
+	color: #f8fafc;
+}
+
+.auth-tab.auth-tab-active {
+	background: #22c55e;
+	color: #052e16;
+}
+
+.login-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+	margin-bottom: 1.35rem;
+}
+
+.login-title {
+	margin: 0;
+	color: #f8fafc;
+	font-size: 2.25rem; /* Larger text */
+	font-weight: 600;
+	letter-spacing: -0.02em;
+}
+
+.login-subtitle {
+	margin: 0.5rem 0 0;
+	color: #94a3b8;
+	font-size: 1.1rem; /* Larger subtitle */
+	font-weight: 400;
+}
+
+/* --- Input & Field Styling --- */
+
+.field-label {
+	color: #f1f5f9;
+	font-size: 0.92rem;
+	font-weight: 600;
+	margin-bottom: 0.1rem;
+}
+
+.login-form {
+	display: grid;
+	gap: 0.75rem;
+}
+
+:host ::ng-deep .hpms-input {
+	width: 100% !important;
+	background: rgba(15, 23, 42, 0.6) !important;
+	border: 1px solid rgba(148, 163, 184, 0.3) !important;
+	color: #f8fafc !important;
+	border-radius: 0.75rem !important;
+	padding: 0.72rem 0.95rem !important;
+	font-size: 0.95rem !important;
+}
+
+/* --- Password Icon Position --- */
+
+:host ::ng-deep .p-password {
+		width: 100%;
+		position: relative;
+	display: inline-flex;
+}
+
+:host ::ng-deep .p-password .p-inputtext {
+	width: 100%;
+	padding-right: 2.5rem !important;
+}
+
+:host ::ng-deep .p-password .p-password-toggle-mask-icon,
+:host ::ng-deep .p-password .p-inputicon,
+:host ::ng-deep .p-password .p-icon-field-icon,
+:host ::ng-deep .p-password-reveal {
+		position: absolute;
+	right: 1rem;
+	left: auto !important;
+	inset-inline-end: 1rem;
+	inset-inline-start: auto !important;
+		top: 50%;
+		transform: translateY(-50%);
+		color: #94a3b8;
+		cursor: pointer;
+		z-index: 10;
+}
+
+/* --- Options & Button --- */
+
+.login-options {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin: 0.35rem 0 0.85rem;
+	font-size: 0.9rem;
+}
+
+:host ::ng-deep .hpms-btn-accent {
+	background: #22c55e !important;
+	border: none !important;
+	width: 100% !important;
+	display: inline-flex !important;
+	justify-content: center !important;
+	padding: 0.78rem !important;
+	border-radius: 0.75rem !important;
+}
+
+:host ::ng-deep .hpms-btn-accent .p-button-label {
+		font-size: 1rem;
+		font-weight: 700;
+}

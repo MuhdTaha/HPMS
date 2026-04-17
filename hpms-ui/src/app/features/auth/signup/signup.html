@@ -1,0 +1,95 @@
+<div class="login-body">
+  <div class="login-card shadow-8">
+    <div class="auth-tabs" role="tablist" aria-label="Authentication pages">
+      <a
+        role="tab"
+        class="auth-tab"
+        routerLink="/login"
+        routerLinkActive="auth-tab-active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        Login
+      </a>
+      <a
+        role="tab"
+        class="auth-tab"
+        routerLink="/signup"
+        routerLinkActive="auth-tab-active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        Sign Up
+      </a>
+    </div>
+
+    <div class="login-header">
+      <div class="hpms-logo" aria-hidden="true"></div>
+      <h1 class="login-title">Create Your Account</h1>
+      <p class="login-subtitle">Set up access to HPMS in seconds</p>
+    </div>
+
+    <div class="login-form p-fluid">
+      <div class="field-group">
+        <label for="fullName" class="field-label">Full Name</label>
+        <input
+          id="fullName"
+          type="text"
+          pInputText
+          placeholder="Your full name"
+          [(ngModel)]="fullName"
+          class="hpms-input"
+        />
+      </div>
+
+      <div class="field-group">
+        <label for="email" class="field-label">Email</label>
+        <input
+          id="email"
+          type="email"
+          pInputText
+          placeholder="Email address"
+          [(ngModel)]="email"
+          class="hpms-input"
+        />
+      </div>
+
+      <div class="field-group">
+        <label for="password" class="field-label">Password</label>
+        <p-password
+          id="password"
+          [(ngModel)]="password"
+          [feedback]="false"
+          [toggleMask]="true"
+          iconDisplay="input"
+          placeholder="Password"
+          styleClass="w-full hpms-password"
+          inputStyleClass="hpms-input"
+        ></p-password>
+      </div>
+
+      <div class="field-group">
+        <label for="confirmPassword" class="field-label">Confirm Password</label>
+        <p-password
+          id="confirmPassword"
+          [(ngModel)]="confirmPassword"
+          [feedback]="false"
+          [toggleMask]="true"
+          iconDisplay="input"
+          placeholder="Confirm password"
+          styleClass="w-full hpms-password"
+          inputStyleClass="hpms-input"
+        ></p-password>
+      </div>
+
+      @if (errorMessage) {
+        <p class="form-error">{{ errorMessage }}</p>
+      }
+
+      <p-button
+        label="Create Account"
+        styleClass="w-full hpms-btn-accent"
+        (onClick)="onSignUp()"
+        [loading]="loading"
+      ></p-button>
+    </div>
+  </div>
+</div>
