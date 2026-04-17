@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HPMS.Tests.Unit", "HPMS.Tests.Unit.csproj", "{2C01415D-C582-4188-A1D5-C9892054DCC6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2C01415D-C582-4188-A1D5-C9892054DCC6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C01415D-C582-4188-A1D5-C9892054DCC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C01415D-C582-4188-A1D5-C9892054DCC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C01415D-C582-4188-A1D5-C9892054DCC6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

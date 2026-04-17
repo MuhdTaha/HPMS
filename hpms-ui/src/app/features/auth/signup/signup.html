@@ -1,5 +1,5 @@
-<div class="login-body">
-  <div class="login-card shadow-8">
+<div class="signup-body">
+  <div class="signup-card shadow-8">
     <div class="auth-tabs" role="tablist" aria-label="Authentication pages">
       <a
         role="tab"
@@ -21,63 +21,122 @@
       </a>
     </div>
 
-    <div class="login-header">
+    <div class="signup-header">
       <div class="hpms-logo" aria-hidden="true"></div>
-      <h1 class="login-title">Create Your Account</h1>
-      <p class="login-subtitle">Set up access to HPMS in seconds</p>
+      <h1 class="signup-title">Create Your Account</h1>
+      <p class="signup-subtitle">Set up your clinic and admin access in one step</p>
     </div>
 
-    <div class="login-form p-fluid">
-      <div class="field-group">
-        <label for="fullName" class="field-label">Full Name</label>
-        <input
-          id="fullName"
-          type="text"
-          pInputText
-          placeholder="Your full name"
-          [(ngModel)]="fullName"
-          class="hpms-input"
-        />
-      </div>
+    <form class="signup-form p-fluid" (ngSubmit)="onSignUp()">
+      <div class="signup-grid">
+        <section class="form-section">
+          <div class="section-heading">
+            <h2>Clinic details</h2>
+            <p>Tell us where this account will be used.</p>
+          </div>
 
-      <div class="field-group">
-        <label for="email" class="field-label">Email</label>
-        <input
-          id="email"
-          type="email"
-          pInputText
-          placeholder="Email address"
-          [(ngModel)]="email"
-          class="hpms-input"
-        />
-      </div>
+          <div class="field-group field-span-2">
+            <label for="clinicName" class="field-label">Clinic name</label>
+            <input
+              id="clinicName"
+              type="text"
+              pInputText
+              placeholder="Example Health Clinic"
+              [(ngModel)]="clinicName"
+              name="clinicName"
+              class="hpms-input"
+            />
+          </div>
+        </section>
 
-      <div class="field-group">
-        <label for="password" class="field-label">Password</label>
-        <p-password
-          id="password"
-          [(ngModel)]="password"
-          [feedback]="false"
-          [toggleMask]="true"
-          iconDisplay="input"
-          placeholder="Password"
-          styleClass="w-full hpms-password"
-          inputStyleClass="hpms-input"
-        ></p-password>
-      </div>
+        <section class="form-section">
+          <div class="section-heading">
+            <h2>Admin account</h2>
+            <p>Use the details for the first clinic administrator.</p>
+          </div>
 
-      <div class="field-group">
-        <label for="confirmPassword" class="field-label">Confirm Password</label>
-        <p-password
-          id="confirmPassword"
-          [(ngModel)]="confirmPassword"
-          [feedback]="false"
-          [toggleMask]="true"
-          iconDisplay="input"
-          placeholder="Confirm password"
-          styleClass="w-full hpms-password"
-          inputStyleClass="hpms-input"
-        ></p-password>
+          <div class="field-group">
+            <label for="firstName" class="field-label">First name</label>
+            <input
+              id="firstName"
+              type="text"
+              pInputText
+              placeholder="First name"
+              [(ngModel)]="firstName"
+              name="firstName"
+              class="hpms-input"
+            />
+          </div>
+
+          <div class="field-group">
+            <label for="lastName" class="field-label">Last name</label>
+            <input
+              id="lastName"
+              type="text"
+              pInputText
+              placeholder="Last name"
+              [(ngModel)]="lastName"
+              name="lastName"
+              class="hpms-input"
+            />
+          </div>
+
+          <div class="field-group field-span-2">
+            <label for="username" class="field-label">Username</label>
+            <input
+              id="username"
+              type="text"
+              pInputText
+              placeholder="Choose a username"
+              [(ngModel)]="username"
+              name="username"
+              class="hpms-input"
+            />
+          </div>
+
+          <div class="field-group field-span-2">
+            <label for="email" class="field-label">Email</label>
+            <input
+              id="email"
+              type="email"
+              pInputText
+              placeholder="Email address"
+              [(ngModel)]="email"
+              name="email"
+              class="hpms-input"
+            />
+          </div>
+
+          <div class="field-group">
+            <label for="password" class="field-label">Password</label>
+            <p-password
+              id="password"
+              [(ngModel)]="password"
+              name="password"
+              [feedback]="false"
+              [toggleMask]="true"
+              iconDisplay="input"
+              placeholder="Password"
+              styleClass="w-full hpms-password"
+              inputStyleClass="hpms-input"
+            ></p-password>
+          </div>
+
+          <div class="field-group">
+            <label for="confirmPassword" class="field-label">Confirm password</label>
+            <p-password
+              id="confirmPassword"
+              [(ngModel)]="confirmPassword"
+              name="confirmPassword"
+              [feedback]="false"
+              [toggleMask]="true"
+              iconDisplay="input"
+              placeholder="Confirm password"
+              styleClass="w-full hpms-password"
+              inputStyleClass="hpms-input"
+            ></p-password>
+          </div>
+        </section>
       </div>
 
       @if (errorMessage) {
@@ -85,11 +144,11 @@
       }
 
       <p-button
+        type="submit"
         label="Create Account"
         styleClass="w-full hpms-btn-accent"
-        (onClick)="onSignUp()"
         [loading]="loading"
       ></p-button>
-    </div>
+    </form>
   </div>
 </div>

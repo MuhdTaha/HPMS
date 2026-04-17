@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
@@ -7,7 +7,12 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 
-import { AuthService } from '../../../core/services/auth';
+import { AuthService } from '../../../core/services/auth/auth';
+import { ToastService } from '../../../core/services/toast/index';
+
+interface TenantResponse {
+  id: string;
+}
 
 @Component({
   selector: 'app-signup',
@@ -23,13 +28,19 @@ import { AuthService } from '../../../core/services/auth';
   templateUrl: './signup.html',
   styleUrl: './signup.scss'
 })
+
 export class SignupComponent {
-  fullName = '';
+  username = '';
+  firstName = '';
+  lastName = '';
   email = '';
   password = '';
   confirmPassword = '';
+  clinicName = '';
+
   loading = false;
   errorMessage = '';
+  private readonly toastService = inject(ToastService);
 
   constructor(
     private readonly authService: AuthService,
@@ -39,36 +50,46 @@ export class SignupComponent {
   onSignUp(): void {
     this.errorMessage = '';
 
-    if (!this.fullName || !this.email || !this.password || !this.confirmPassword) {
+    if (!this.username || !this.firstName || !this.lastName || !this.email || !this.password || !this.confirmPassword || !this.clinicName) {
       this.errorMessage = 'Please fill in all required fields.';
+      this.toastService.error('Missing details', this.errorMessage);
       return;
     }
 
     if (this.password !== this.confirmPassword) {
       this.errorMessage = 'Passwords do not match.';
+      this.toastService.error('Signup failed', this.errorMessage);
       return;
     }
 
     this.loading = true;
 
-    this.authService
-      .signup({
-        fullName: this.fullName,
-        email: this.email,
-        password: this.password,
-        confirmPassword: this.confirmPassword
-      })
-      .subscribe({
-        next: () => {
-          this.router.navigate(['/login']);
-        },
-        error: () => {
-          this.loading = false;
-          this.errorMessage = 'Unable to create account. Please try again.';
-        },
-        complete: () => {
-          this.loading = false;
-        }
-      });
+    this.authService.createTenant(this.clinicName).subscribe({
+      next: (tenant: TenantResponse) => {
+        const userDto = {
+          username: this.username,
+          email: this.email,
+          firstName: this.firstName,
+          lastName: this.lastName,
+          tenantId: tenant.id,
+          roleId: 1,
+          password: this.password
+        };
+
+        this.authService.registerUser(userDto).subscribe({
+          next: () => this.router.navigate(['/login']),
+          error: () => {
+            this.loading = false;
+            this.errorMessage = 'Clinic created, but user registration failed.';
+            this.toastService.error('Signup failed', this.errorMessage);
+          }
+        });
+      },
+      error: () => {
+        this.loading = false;
+        this.errorMessage = 'Failed to onboard clinic. Please check the name.';
+        this.toastService.error('Signup failed', this.errorMessage);
+      }
+    });
   }
 }

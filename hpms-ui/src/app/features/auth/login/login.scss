@@ -16,7 +16,7 @@
 	max-width: 550px; /* Wider card for a more professional look */
     height: 95%; /* Full viewport height for a centered look */
 	border-radius: 1.5rem;
-	padding: 3.5rem 3rem 3rem; /* Top padding leaves room for floating tabs */
+	padding: 4.4rem 3rem 3rem; /* Extra top clearance for tabs above logo */
 	background: rgba(15, 23, 42, 0.9);
 	border: 1px solid rgba(255, 255, 255, 0.1);
 	border-top: 4px solid #22c55e;
@@ -27,9 +27,9 @@
 
 .auth-tabs {
 	position: absolute;
-	top: 0;
+	top: 0.35rem;
 	left: 50%;
-	transform: translate(-50%, -50%);
+	transform: translateX(-50%);
 	display: inline-flex;
 	align-items: center;
 	gap: 0.4rem;

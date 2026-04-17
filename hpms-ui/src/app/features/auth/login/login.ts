@@ -1,14 +1,18 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { AuthService } from '../../../core/services/auth';
 
 // PrimeNG Imports
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
+
+// Services and Models
+import { LoginRequest } from '../../../core/services/auth/auth.models';
+import { AuthService } from '../../../core/services/auth/auth';
+import { ToastService } from '../../../core/services/toast/index';
 
 @Component({
   selector: 'app-login',
@@ -17,23 +21,40 @@ import { CheckboxModule } from 'primeng/checkbox';
   styleUrl: './login.scss'
 })
 export class LoginComponent {
-  email = '';
+  username = '';
   password = '';
   rememberMe = false;
   loading = false;
+  private readonly toastService = inject(ToastService);
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
   onLogin() {
+    if (!this.username || !this.password) {
+      this.toastService.error('Missing details', 'Enter both username and password before signing in.');
+      return;
+    }
+
     this.loading = true;
-    this.authService.login({ email: this.email, password: this.password, rememberMe: this.rememberMe }).subscribe({
+
+    const request: LoginRequest = {
+        username: this.username,
+        password: this.password
+    };
+
+    this.authService.login(request).subscribe({
       next: () => {
+        this.loading = false;
+        console.log('Login successful');
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.loading = false;
         console.error('Login failed', err);
-        // TODO:Add PrimeNG Toast for error message
+        this.toastService.error('Login failed', 'Invalid username or password.');
       }
     });
   }

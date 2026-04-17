@@ -61,6 +61,17 @@ builder.Services.AddMediatR(cfg =>
     );
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AngularClient", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .WithExposedHeaders("X-Tenant-Id"); // If you send it back in headers
+    });
+});
+
 builder.Services.AddAuthorization();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -117,6 +128,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthentication(); 
 app.UseAuthorization();
+app.UseCors("AngularClient");
 
 app.MapIdentityEndpoints();
 app.MapSchedulingEndpoints();

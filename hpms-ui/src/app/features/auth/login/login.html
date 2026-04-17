@@ -29,13 +29,13 @@
 
         <div class="login-form p-fluid">
             <div class="field-group">
-                <label for="email" class="field-label">Email</label>
+                <label for="username" class="field-label">Username</label>
                 <input
-                    id="email"
+                    id="username"
                     type="text"
                     pInputText
-                    placeholder="Email address"
-                    [(ngModel)]="email"
+                    placeholder="Username"
+                    [(ngModel)]="username"
                     class="hpms-input"
                 />
             </div>
@@ -56,17 +56,19 @@
 
             <div class="login-options">
                 <div class="remember-option">
-                    <p-checkbox id="remember" [binary]="true" [(ngModel)]="rememberMe"></p-checkbox>
+                    <p-checkbox id="remember" [binary]="true"></p-checkbox>
                     <label for="remember" class="ml-2 cursor-pointer">Remember me</label>
                 </div>
                 <a class="forgot-link">Forgot password?</a>
             </div>
 
             <p-button
-                label="Sign In"
+                [label]="loading ? '' : 'Sign In'"
+                [icon]="loading ? 'pi pi-spin pi-spinner' : undefined"
                 styleClass="w-full hpms-btn-accent"
                 (onClick)="onLogin()"
-                [loading]="loading"
+                [disabled]="loading"
+                [attr.aria-label]="loading ? 'Signing in' : 'Sign In'"
             ></p-button>
         </div>
     </div>

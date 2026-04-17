@@ -83,13 +83,11 @@ body {
 
 /* 5. Placeholder Logo Style */
 .hpms-logo {
-    width: 60px;
-    height: 60px;
-    background-color: var(--hpms-bg);
-    border: 3px solid var(--hpms-accent);
-    border-radius: 50%;
-    /* Simplified shape from reference image */
-    clip-path: polygon(50% 0%, 100% 35%, 82% 100%, 18% 100%, 0% 35%);
+  width: 3.5rem;
+  height: 3.5rem;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #22c55e, #0ea5e9);
 }
 
 /* 6. Text Accent Color utility */
@@ -196,4 +194,52 @@ body {
     &:focus {
         box-shadow: 0 0 0 3px rgba(85, 240, 181, 0.4) !important;
     }
+}
+
+/* TOAST GLOBAL OVERRIDE */
+.hpms-toast .p-toast-message {
+    border-radius: 12px !important;
+    border: 1px solid var(--hpms-border) !important;
+    background: rgba(15, 23, 42, 0.96) !important;
+    color: #f8fafc !important;
+    box-shadow: 0 20px 40px rgba(2, 6, 23, 0.45) !important;
+    backdrop-filter: blur(8px);
+}
+
+.hpms-toast .p-toast-message-content {
+    padding: 0.9rem 1rem !important;
+}
+
+.hpms-toast .p-toast-summary {
+    color: #f8fafc !important;
+    font-weight: 700 !important;
+}
+
+.hpms-toast .p-toast-detail {
+    color: #cbd5e1 !important;
+}
+
+.hpms-toast .p-toast-message-icon {
+    display: none !important;
+}
+
+
+.hpms-toast .p-toast-icon-close {
+    color: #94a3b8 !important;
+}
+
+.hpms-toast .p-toast-message-success {
+    border-left: 4px solid #22c55e !important;
+}
+
+.hpms-toast .p-toast-message-info {
+    border-left: 4px solid #0ea5e9 !important;
+}
+
+.hpms-toast .p-toast-message-warn {
+    border-left: 4px solid #f59e0b !important;
+}
+
+.hpms-toast .p-toast-message-error {
+    border-left: 4px solid #f43f5e !important;
 }
