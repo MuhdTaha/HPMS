@@ -68,6 +68,10 @@ public static class IdentityEndpoints
                 {
                     return Results.Unauthorized();
                 }
+                
+                // Determine expiration based on "Remember Me"
+                var expirationHours = request.RememberMe ? 740 : 8; // 30 days vs 8 hours
+                var expirationDate = DateTime.UtcNow.AddHours(expirationHours);
 
                 // Create the Claims (key-value pair that describes the user, encoded into the JWT)
                 var claims = new[]
@@ -86,7 +90,7 @@ public static class IdentityEndpoints
                     issuer: config["Jwt:Issuer"],
                     audience: config["Jwt:Audience"],
                     claims: claims,
-                    expires: DateTime.Now.AddHours(8),
+                    expires: expirationDate,
                     signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
                 );
 

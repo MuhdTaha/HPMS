@@ -28,7 +28,7 @@
         </div>
 
         <div class="login-form p-fluid">
-            <div class="field-group">
+            <div class="field-group" [class.field-valid]="usernameValid">
                 <label for="username" class="field-label">Username</label>
                 <input
                     id="username"
@@ -36,15 +36,18 @@
                     pInputText
                     placeholder="Username"
                     [(ngModel)]="username"
+                    (ngModelChange)="onUsernameChange($event)"
                     class="hpms-input"
                 />
+                <p class="field-error" *ngIf="usernameError">{{ usernameError }}</p>
             </div>
 
-            <div class="field-group">
+            <div class="field-group" [class.field-valid]="passwordValid">
                 <label for="password" class="field-label">Password</label>
                 <p-password
                     id="password"
                     [(ngModel)]="password"
+                    (ngModelChange)="onPasswordChange($event)"
                     [feedback]="false"
                     [toggleMask]="true"
                     iconDisplay="input"
@@ -52,11 +55,12 @@
                     styleClass="w-full hpms-password"
                     inputStyleClass="hpms-input"
                 ></p-password>
+                <p class="field-error" *ngIf="passwordError">{{ passwordError }}</p>
             </div>
 
             <div class="login-options">
                 <div class="remember-option">
-                    <p-checkbox id="remember" [binary]="true"></p-checkbox>
+                    <input id="remember" type="checkbox" [(ngModel)]="rememberMe" class="hpms-remember-checkbox" />
                     <label for="remember" class="ml-2 cursor-pointer">Remember me</label>
                 </div>
                 <a class="forgot-link">Forgot password?</a>

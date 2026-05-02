@@ -1,36 +1,47 @@
-/* 1. HPMS Custom Color Variables based on reference image */
 :root {
-    --hpms-bg: #111111;              /* Pure dark background */
-    --hpms-card-bg: #1e1e1e;         /* Slightly lighter card background */
-    --hpms-accent: #55f0b5;          /* The neon green accent color */
-    --hpms-accent-hover: #44c393;    /* Hover state for accent */
-    --hpms-input-bg: #151515;        /* Input field background */
-    --hpms-border: #333333;          /* Subtle border color */
+    --hpms-bg: #111111;
+    --hpms-surface: #151515;
+    --hpms-surface-elevated: #1e1e1e;
+    --hpms-accent: #55f0b5;
+    --hpms-accent-hover: #44c393;
+    --hpms-input-bg: #151515;
+    --hpms-border: #333333;
+    --hpms-text: #ffffff;
+    --hpms-text-muted: #cbd5e1;
+    --hpms-text-subtle: #666666;
+    --hpms-success: #22c55e;
+    --hpms-info: #0ea5e9;
+    --hpms-warning: #f59e0b;
+    --hpms-error: #f43f5e;
+    --hpms-auth-bg-start: #1c8f57;
+    --hpms-auth-bg-mid: #0b6f9f;
+    --hpms-auth-bg-end: #060b16;
+    --hpms-auth-bg-gradient:
+        radial-gradient(circle at left center, rgba(28, 143, 87, 0.34) 0%, rgba(28, 143, 87, 0.16) 18%, rgba(6, 11, 22, 0) 52%),
+        radial-gradient(circle at right center, rgba(11, 111, 159, 0.34) 0%, rgba(11, 111, 159, 0.16) 18%, rgba(6, 11, 22, 0) 52%),
+        radial-gradient(circle at center, rgba(6, 11, 22, 0.3) 0%, rgba(6, 11, 22, 0.75) 56%, rgba(6, 11, 22, 0.98) 100%);
 }
 
-/* 2. Global Body Overrides */
 body {
     background-color: var(--hpms-bg);
-    color: #ffffff; /* White text overall */
-    font-family: 'Titillium Web', sans-serif; /* Modern, clean font */
+    color: var(--hpms-text);
+    font-family: 'Titillium Web', sans-serif;
     margin: 0;
     -webkit-font-smoothing: antialiased;
 }
 
-/* 3. Outer Login Container */
 .login-body {
     background-color: var(--hpms-bg);
 }
 
-/* 4. Login Card Styling */
 .login-card {
     width: 100%;
-    max-width: 400px; /* Reduced from 50rem (800px) which is way too wide for a login card */
+    max-width: 400px;
     border-radius: 1.5rem;
     padding: 2.5rem;
     background: rgba(15, 23, 42, 0.8);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-top: 3px solid #22c55e; /* Static green or use your --hpms-accent */
+    border-top: 3px solid var(--hpms-success);
     backdrop-filter: blur(12px);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
@@ -38,7 +49,7 @@ body {
 .login-form {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem; /* Consistent spacing between rows */
+    gap: 1.25rem;
 }
 
 .field-group {
@@ -55,7 +66,7 @@ body {
 
 /* Ensure the Toggle Mask icon is positioned correctly */
 :host ::ng-deep .p-password-reveal {
-  color: #94a3b8;
+    color: var(--hpms-text-muted);
   right: 0.75rem;
 }
 
@@ -77,8 +88,8 @@ body {
 /* Override PrimeNG focus ring for a cleaner look */
 :host ::ng-deep .hpms-input:focus {
   outline: none;
-  border-color: #22c55e !important;
-  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2) !important;
+    border-color: var(--hpms-success) !important;
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2) !important;
 }
 
 /* 5. Placeholder Logo Style */
@@ -87,7 +98,7 @@ body {
   height: 3.5rem;
   margin: 0 auto 1rem;
   border-radius: 50%;
-  background: linear-gradient(135deg, #22c55e, #0ea5e9);
+    background: linear-gradient(135deg, var(--hpms-success), var(--hpms-info));
 }
 
 /* 6. Text Accent Color utility */
@@ -103,9 +114,9 @@ body {
 .p-inputtext, .hpms-input {
     background-color: var(--hpms-input-bg) !important;
     border: 1px solid var(--hpms-border) !important;
-    color: #ffffff !important;
+    color: var(--hpms-text) !important;
     border-radius: 10px !important;
-    padding: 0.75rem 1.25rem !important;
+    padding: 0.5rem 0.75rem !important;
 
     &:focus {
         border-color: var(--hpms-accent) !important;
@@ -113,7 +124,7 @@ body {
     }
 
     &::placeholder {
-        color: #666666 !important;
+        color: var(--hpms-text-subtle) !important;
     }
 }
 
@@ -129,12 +140,12 @@ body {
     /* Override the built-in eye icon to match reference color */
     .p-password-panel .p-password-show i,
     .p-input-icon-left > i, .p-input-icon-right > i {
-        color: #666666 !important;
+        color: var(--hpms-text-subtle) !important;
     }
 
     /* Eye icon alignment in lara theme */
     .p-inputtext + i {
-        color: #666666 !important;
+        color: var(--hpms-text-subtle) !important;
         right: 1.25rem;
     }
 }
@@ -145,7 +156,7 @@ body {
     border: 1px solid var(--hpms-border) !important;
     border-right: none !important; /* Merge with input */
     border-radius: 10px 0 0 10px !important;
-    color: #666666 !important;
+    color: var(--hpms-text-subtle) !important;
     font-size: 1.2rem;
 }
 
@@ -201,7 +212,7 @@ body {
     border-radius: 12px !important;
     border: 1px solid var(--hpms-border) !important;
     background: rgba(15, 23, 42, 0.96) !important;
-    color: #f8fafc !important;
+    color: var(--hpms-text) !important;
     box-shadow: 0 20px 40px rgba(2, 6, 23, 0.45) !important;
     backdrop-filter: blur(8px);
 }
@@ -211,12 +222,12 @@ body {
 }
 
 .hpms-toast .p-toast-summary {
-    color: #f8fafc !important;
+    color: var(--hpms-text) !important;
     font-weight: 700 !important;
 }
 
 .hpms-toast .p-toast-detail {
-    color: #cbd5e1 !important;
+    color: var(--hpms-text-muted) !important;
 }
 
 .hpms-toast .p-toast-message-icon {
@@ -225,21 +236,21 @@ body {
 
 
 .hpms-toast .p-toast-icon-close {
-    color: #94a3b8 !important;
+    color: var(--hpms-text-muted) !important;
 }
 
 .hpms-toast .p-toast-message-success {
-    border-left: 4px solid #22c55e !important;
+    border-left: 4px solid var(--hpms-success) !important;
 }
 
 .hpms-toast .p-toast-message-info {
-    border-left: 4px solid #0ea5e9 !important;
+    border-left: 4px solid var(--hpms-info) !important;
 }
 
 .hpms-toast .p-toast-message-warn {
-    border-left: 4px solid #f59e0b !important;
+    border-left: 4px solid var(--hpms-warning) !important;
 }
 
 .hpms-toast .p-toast-message-error {
-    border-left: 4px solid #f43f5e !important;
+    border-left: 4px solid var(--hpms-error) !important;
 }

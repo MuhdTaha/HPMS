@@ -76,9 +76,9 @@ public class PatientIsolationTests(WebApplicationFactory<Program> factory) : Bas
         response.EnsureSuccessStatusCode();
     }
 
-    private async Task<string> LoginAndGetTokenAsync(string username, string password)
+    private async Task<string> LoginAndGetTokenAsync(string username, string password, bool rememberMe = true)
     {
-        var response = await Client.PostAsJsonAsync("/identity/login", new LoginRequest(username, password));
+        var response = await Client.PostAsJsonAsync("/identity/login", new LoginRequest(username, password, rememberMe));
         response.EnsureSuccessStatusCode();
 
         var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>();
