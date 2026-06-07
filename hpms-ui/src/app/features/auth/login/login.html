@@ -1,79 +1,49 @@
 <div class="login-body">
-    <div class="login-card shadow-8">
-        <div class="auth-tabs" role="tablist" aria-label="Authentication pages">
-            <a
-                role="tab"
-                class="auth-tab"
-                routerLink="/login"
-                routerLinkActive="auth-tab-active"
-                [routerLinkActiveOptions]="{ exact: true }"
-            >
-                Login
-            </a>
-            <a
-                role="tab"
-                class="auth-tab"
-                routerLink="/signup"
-                routerLinkActive="auth-tab-active"
-                [routerLinkActiveOptions]="{ exact: true }"
-            >
-                Sign Up
-            </a>
-        </div>
-
-        <div class="login-header">
-            <div class="hpms-logo" aria-hidden="true"></div>
-            <h1 class="login-title">Welcome to HPMS</h1>
-            <p class="login-subtitle">Sign in to continue</p>
-        </div>
-
-        <div class="login-form p-fluid">
-            <div class="field-group" [class.field-valid]="usernameValid">
-                <label for="username" class="field-label">Username</label>
-                <input
-                    id="username"
-                    type="text"
-                    pInputText
-                    placeholder="Username"
-                    [(ngModel)]="username"
-                    (ngModelChange)="onUsernameChange($event)"
-                    class="hpms-input"
-                />
-                <p class="field-error" *ngIf="usernameError">{{ usernameError }}</p>
-            </div>
-
-            <div class="field-group" [class.field-valid]="passwordValid">
-                <label for="password" class="field-label">Password</label>
-                <p-password
-                    id="password"
-                    [(ngModel)]="password"
-                    (ngModelChange)="onPasswordChange($event)"
-                    [feedback]="false"
-                    [toggleMask]="true"
-                    iconDisplay="input"
-                    placeholder="Password"
-                    styleClass="w-full hpms-password"
-                    inputStyleClass="hpms-input"
-                ></p-password>
-                <p class="field-error" *ngIf="passwordError">{{ passwordError }}</p>
-            </div>
-
-            <div class="login-options">
-                <div class="remember-option">
-                    <input id="remember" type="checkbox" [(ngModel)]="rememberMe" class="hpms-remember-checkbox" />
-                    <label for="remember" class="ml-2 cursor-pointer">Remember me</label>
-                </div>
-                <a class="forgot-link">Forgot password?</a>
-            </div>
-
-            <p-button
-                [label]="loading ? '' : 'Sign In'"
-                [icon]="loading ? 'pi pi-spin pi-spinner' : undefined"
-                styleClass="w-full hpms-btn-accent"
-                (onClick)="onLogin()"
-                [disabled]="loading"
-                [attr.aria-label]="loading ? 'Signing in' : 'Sign In'"
-            ></p-button>
-        </div>
+  <div class="login-card shadow-8">
+    <div class="auth-tabs" role="tablist" aria-label="Authentication pages">
+      <a role="tab" class="auth-tab" routerLink="/login" routerLinkActive="auth-tab-active"
+        [routerLinkActiveOptions]="{ exact: true }">
+        Login
+      </a>
+      <a role="tab" class="auth-tab" routerLink="/signup" routerLinkActive="auth-tab-active"
+        [routerLinkActiveOptions]="{ exact: true }">
+        Sign Up
+      </a>
     </div>
+
+    <div class="login-header">
+      <div class="hpms-logo" aria-hidden="true"></div>
+      <h1 class="login-title">Welcome to HPMS</h1>
+      <p class="login-subtitle">Sign in to continue</p>
+    </div>
+
+    <div class="login-form p-fluid">
+      <div class="field-group" [class.field-valid]="usernameValid">
+        <label for="username" class="field-label">Username</label>
+        <input id="username" type="text" pInputText placeholder="Username" [(ngModel)]="username"
+          (ngModelChange)="onUsernameChange($event)" class="hpms-input" />
+        <p class="field-error" *ngIf="usernameError">{{ usernameError }}</p>
+      </div>
+
+      <div class="field-group" [class.field-valid]="passwordValid">
+        <label for="password" class="field-label">Password</label>
+        <p-password id="password" [(ngModel)]="password" (ngModelChange)="onPasswordChange($event)" [feedback]="false"
+          [toggleMask]="true" iconDisplay="input" placeholder="Password" styleClass="w-full hpms-password"
+          inputStyleClass="hpms-input"></p-password>
+        <p class="field-error" *ngIf="passwordError">{{ passwordError }}</p>
+      </div>
+
+      <div class="login-options">
+        <div class="remember-option">
+          <input id="remember" type="checkbox" [(ngModel)]="rememberMe" class="hpms-remember-checkbox" />
+          <label for="remember" class="ml-2 cursor-pointer">Remember me</label>
+        </div>
+        <a class="forgot-link">Forgot password?</a>
+      </div>
+
+      <p-button [label]="loading ? '' : 'Sign In'" [icon]="loading ? 'pi pi-spin pi-spinner' : undefined"
+        styleClass="w-full hpms-btn-accent" (onClick)="onLogin()" [disabled]="loading"
+        [attr.aria-label]="loading ? 'Signing in' : 'Sign In'"></p-button>
+    </div>
+  </div>
 </div>

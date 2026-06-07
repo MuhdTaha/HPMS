@@ -1,128 +1,176 @@
+# Database Design: HPMS
 
----
+## 1. Overview
 
-# Database Design: Healthcare Practice Management System (HPMS)
+HPMS uses a **shared database, shared schema** multi-tenancy model. Every tenant-scoped table includes a `TenantId` column. Isolation is enforced by EF Core global query filters (see [DESIGN.md](DESIGN.md)).
 
-## 1. ERM Overview
+Three separate **DbContexts** share one connection string (`HPMS_Dev` locally):
 
-The HPMS database uses a **Shared Database, Shared Schema** multi-tenancy approach. Every table (excluding the global `Tenants` table) includes a `TenantId` to ensure strict data isolation via EF Core Global Query Filters.
+| DbContext | Module | Migrations folder |
+|-----------|--------|-------------------|
+| `IdentityDbContext` | Identity | `HPMS.Modules.Identity/Migrations/` |
+| `SchedulingDbContext` | Scheduling | `HPMS.Scheduling/Migrations/` |
+| `BillingDbContext` | Billing | `HPMS.Modules.Billing/Migrations/` |
+
+Tables marked **(planned)** are documented in requirements but not yet migrated.
 
 ---
 
 ## 2. Global & Infrastructure Tables
 
-These tables manage the SaaS platform's multi-tenancy and compliance requirements.
+### `Tenants` — implemented
 
-### `Tenants`
-
-Stores the identity of the independent clinics using the platform.
 | Column | Type | Description |
-| :--- | :--- | :--- |
-| **Id** (PK) | Guid | Unique identifier for the clinic. |
-| **Name** | nvarchar(255) | Legal name of the practice. |
-| **ApiKey** | nvarchar(max) | Encrypted key for external integrations. |
-| **IsActive** | boolean | Subscription status. |
-| **CreatedAt** | datetime | Timestamp of onboarding. |
+|--------|------|-------------|
+| **Id** (PK) | uniqueidentifier | Clinic identifier |
+| **Name** | nvarchar | Practice name |
+| **IsActive** | bit | Active flag (default true) |
+| **CreatedAt** | datetime2 | Onboarding timestamp |
 
-### `AuditLogs`
+Entity: `HPMS.Modules.Identity/Entities/Tenant.cs`
 
-Mandatory for HIPAA compliance; tracks every mutation in the system.
+> **Planned (not in schema):** `ApiKey` for external integrations.
+
+### `AuditLogs` — planned (Phase 5)
+
 | Column | Type | Description |
-| :--- | :--- | :--- |
-| **Id** (PK) | bigint | Unique log identifier. |
-| **TenantId** (FK) | Guid | Links log to a specific clinic. |
-| **EntityName** | nvarchar(100) | Name of the table (e.g., "Patients"). |
-| **EntityId** | nvarchar(100) | The PK of the modified record. |
-| **UserId** (FK) | Guid | The user who performed the action. |
-| **Action** | nvarchar(10) | Create, Update, or Delete. |
-| **OldValues** | nvarchar(max) | JSON snapshot of data before change. |
-| **NewValues** | nvarchar(max) | JSON snapshot of data after change. |
-| **Timestamp** | datetime | Date and time of the event. |
+|--------|------|-------------|
+| **Id** (PK) | bigint | Log identifier |
+| **TenantId** (FK) | uniqueidentifier | Clinic |
+| **EntityName** | nvarchar | Table name |
+| **EntityId** | nvarchar | Record PK |
+| **UserId** (FK) | uniqueidentifier | Actor |
+| **Action** | nvarchar | Create, Update, Delete |
+| **OldValues** | nvarchar(max) | JSON before change |
+| **NewValues** | nvarchar(max) | JSON after change |
+| **Timestamp** | datetime2 | Event time |
 
 ---
 
-## 3. Identity Module (`HPMS.Identity`)
+## 3. Identity Module
 
-Manages RBAC (Role-Based Access Control) and user authentication.
+### `Roles` — implemented
 
-### `Users`
+Seeded values: SystemAdmin (1), ClinicAdmin (2), Provider (3), BillingManager (4), FrontDesk (5).
+
+### `Users` — implemented
 
 | Column | Type | Description |
-| --- | --- | --- |
-| **Id** (PK) | Guid | Unique identifier. |
-| **TenantId** (FK) | Guid | Clinic ownership. |
-| **Username** | nvarchar(100) | Login credential. |
-| **PasswordHash** | nvarchar(max) | BCrypt/Argon2 hashed password. |
-| **RoleId** (FK) | int | Reference to the Roles table. |
-| **IsDeleted** | boolean | Soft delete flag for compliance. |
+|--------|------|-------------|
+| **Id** (PK) | uniqueidentifier | User identifier |
+| **TenantId** (FK) | uniqueidentifier | Clinic |
+| **Username** | nvarchar | Login name |
+| **Email** | nvarchar | Email address |
+| **FirstName** | nvarchar | Given name |
+| **LastName** | nvarchar | Family name |
+| **PasswordHash** | nvarchar(max) | BCrypt hash |
+| **RoleId** (FK) | int | Role reference |
+| **IsDeleted** | bit | Soft-delete flag |
 
-### `Roles`
-
-Static table defining permissions: `SystemAdmin`, `ClinicAdmin`, `Provider`, `BillingManager`, `FrontDesk`.
+Entity: `HPMS.Modules.Identity/Entities/User.cs`
 
 ---
 
-## 4. Scheduling Module (`HPMS.Scheduling`)
+## 4. Scheduling Module
 
-Handles clinical operations and patient demographics.
-
-### `Patients`
+### `Patients` — implemented
 
 | Column | Type | Description |
-| --- | --- | --- |
-| **Id** (PK) | Guid | Unique identifier. |
-| **TenantId** (FK) | Guid | Clinic ownership. |
-| **FirstName** | nvarchar(100) | Patient's first name. |
-| **LastName** | nvarchar(100) | Patient's last name. |
-| **DOB** | date | Date of birth. |
-| **PHI_Data** | nvarchar(max) | AES-256 Encrypted contact/medical info. |
-| **IsDeleted** | boolean | Soft delete flag. |
+|--------|------|-------------|
+| **Id** (PK) | uniqueidentifier | Patient identifier |
+| **TenantId** (FK) | uniqueidentifier | Clinic |
+| **FirstName** | nvarchar | Plain-text name (searchable) |
+| **LastName** | nvarchar | Plain-text name |
+| **DateOfBirth** | datetime2 | Date of birth |
+| **PHI_Data** | nvarchar(max) | **AES-256 encrypted** JSON (`PatientPhi`: address, email, phone, SSN, insurance, emergency contact) |
+| **IsDeleted** | bit | Soft-delete flag |
 
-### `Appointments`
+Entity: `HPMS.Scheduling/Entities/Patient.cs`  
+PHI structure: `HPMS.Scheduling/Data/PatientPhi.cs`
+
+### `Appointments` — implemented
 
 | Column | Type | Description |
-| --- | --- | --- |
-| **Id** (PK) | Guid | Unique identifier. |
-| **TenantId** (FK) | Guid | Clinic ownership. |
-| **PatientId** (FK) | Guid | Reference to Patients. |
-| **ProviderId** (FK) | Guid | Reference to Users (Role: Provider). |
-| **StartTime** | datetime | Start of appointment. |
-| **EndTime** | datetime | End of appointment. |
-| **Status** | int | Enum: Scheduled, Arrived, InSession, Completed, NoShow. |
-| **TypeId** (FK) | int | Reference to AppointmentTypes. |
+|--------|------|-------------|
+| **Id** (PK) | uniqueidentifier | Appointment identifier |
+| **TenantId** (FK) | uniqueidentifier | Clinic |
+| **PatientId** (FK) | uniqueidentifier | Patient reference |
+| **ProviderId** | uniqueidentifier | Provider user ID (no FK yet) |
+| **StartTime** | datetime2 | Start |
+| **EndTime** | datetime2 | End |
+| **Status** | int | Enum: Scheduled(1), Arrived(2), InSession(3), Completed(4), NoShow(5), Canceled(6) |
+| **RowVersion** | rowversion | Optimistic concurrency |
+| **IsDeleted** | bit | Soft-delete flag |
+
+Entity: `HPMS.Scheduling/Entities/Appointment.cs`
+
+### `AppointmentTypes` — planned
+
+Would store configurable visit rates referenced by appointments. Currently replaced by hardcoded `VisitFee = 150.00m` on `AppointmentCompletedEvent`.
 
 ---
 
-## 5. Billing Module (`HPMS.Billing`)
+## 5. Billing Module
 
-Triggered by `AppointmentCompletedEvent` via MediatR.
-
-### `Invoices`
+### `Invoices` — implemented
 
 | Column | Type | Description |
-| --- | --- | --- |
-| **Id** (PK) | Guid | Unique identifier. |
-| **TenantId** (FK) | Guid | Clinic ownership. |
-| **AppointmentId** (FK) | Guid | The clinical event that triggered this bill. |
-| **TotalAmount** | decimal(18,2) | Total cost. |
-| **Status** | int | Enum: Draft, Open, Paid, Void. |
+|--------|------|-------------|
+| **Id** (PK) | uniqueidentifier | Invoice identifier |
+| **TenantId** (FK) | uniqueidentifier | Clinic |
+| **AppointmentId** (FK) | uniqueidentifier | Source appointment |
+| **PatientId** (FK) | uniqueidentifier | Patient |
+| **Amount** | decimal(18,2) | Charge amount |
+| **DateGenerated** | datetime2 | Creation time |
+| **Status** | int | Pending(1), Paid(2), Overdue(3), Canceled(4) |
+| **IsDeleted** | bit | Soft-delete flag |
 
-### `FinancialLedger`
+Entity: `HPMS.Modules.Billing/Entities/Invoice.cs`
 
-An immutable table for double-entry accounting.
+> Design doc previously listed `Draft`/`Open`/`Void` statuses — the implemented enum uses **Pending**, **Paid**, **Overdue**, **Canceled**.
+
+### `FinancialLedgers` — implemented
+
 | Column | Type | Description |
-| :--- | :--- | :--- |
-| **Id** (PK) | bigint | Unique identifier. |
-| **TenantId** (FK) | Guid | Clinic ownership. |
-| **InvoiceId** (FK) | Guid | Associated invoice. |
-| **Amount** | decimal(18,2) | Transaction value. |
-| **Type** | nvarchar(10) | Debit (Charge) or Credit (Payment/Refund). |
-| **CreatedAt** | datetime | Immutable timestamp. |
+|--------|------|-------------|
+| **Id** (PK) | bigint | Entry identifier |
+| **TenantId** (FK) | uniqueidentifier | Clinic |
+| **InvoiceId** (FK) | uniqueidentifier | Related invoice |
+| **Amount** | decimal(18,2) | Transaction value |
+| **Type** | nvarchar | `Debit` (charge) or `Credit` (payment) |
+| **CreatedAt** | datetime2 | Immutable timestamp |
+
+Entity: `HPMS.Modules.Billing/Entities/FinancialLedger.cs`
+
+Table name in EF: `FinancialLedgers`.
 
 ---
 
 ## 6. Implementation Notes
 
-1. **Soft Deletes:** All tables implement an `ISoftDelete` interface. Rows are never physically removed from the database to satisfy HIPAA audit requirements.
-2. **Concurrency:** The `Appointments` table uses a `RowVersion` (timestamp) column to handle `FR-S01` (preventing double-booking) during high-concurrency scheduling.
-3. **Indexing:** Non-clustered indexes are applied to all `TenantId` and `IsDeleted` columns to optimize Global Query Filter performance.
+1. **Soft deletes:** Identity, Scheduling, and Billing entities use `ISoftDelete`. Rows are flagged, not physically removed.
+
+2. **Concurrency:** `Appointments.RowVersion` supports optimistic concurrency. Conflict detection for double-booking is also handled in `AppointmentConflictService` before insert.
+
+3. **Indexing:** Non-clustered indexes on `TenantId` and `IsDeleted` are planned for Phase 5 performance work; verify in migration snapshots before assuming they exist.
+
+4. **Cross-module references:** `Appointment.ProviderId` and `Invoice.AppointmentId` are stored as GUIDs without cross-context foreign keys, preserving module boundaries.
+
+5. **Auto-migration:** `HPMS.Web/Program.cs` runs `Database.Migrate()` for all three contexts on startup. CI applies Identity and Scheduling migrations explicitly; Billing relies on startup migration or manual `dotnet ef database update`.
+
+---
+
+## 7. Entity relationship (implemented tables)
+
+```mermaid
+erDiagram
+    Tenants ||--o{ Users : has
+    Roles ||--o{ Users : assigns
+    Tenants ||--o{ Patients : owns
+    Tenants ||--o{ Appointments : owns
+    Patients ||--o{ Appointments : books
+    Appointments ||--o| Invoices : triggers
+    Invoices ||--o{ FinancialLedgers : records
+```
+
+See [API.md](API.md) for how these entities are exposed over HTTP.

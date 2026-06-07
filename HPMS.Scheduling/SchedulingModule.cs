@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using HPMS.Scheduling.Data;
 using HPMS.Scheduling.Entities;
 using HPMS.Scheduling.Services;
+using HPMS.SharedKernel.Authorization;
 using HPMS.SharedKernel.Events;
 using HPMS.SharedKernel.Interfaces;
 using MediatR;
@@ -59,7 +60,8 @@ public static class SchedulingModule
 
             // 5. Return the Created Appointment with a Location header
             return Results.CreatedAtRoute("GetAppointment", new { id = appointment.Id }, appointment);
-        });
+        })
+        .RequireAuthorization(HpmsPolicies.SchedulingWrite);
         
         // UC-02: Update Appointment Status (The State Machine)
         group.MapPatch("/appointments/{id:guid}/status", async (
@@ -100,6 +102,7 @@ public static class SchedulingModule
 
             return Results.Ok(new { Message = $"Status updated from {oldStatus} to {newStatus}" });
         })
+        .RequireAuthorization(HpmsPolicies.VisitManagement)
         .WithName("UpdateAppointmentStatus");
 
         // UC-03: Soft delete an appointment instead of removing it permanently.
@@ -120,6 +123,7 @@ public static class SchedulingModule
 
             return Results.NoContent();
         })
+        .RequireAuthorization(HpmsPolicies.ClinicAdminOrAbove)
         .WithName("DeleteAppointment");
 
         // Helper endpoint for the CreatedAtRoute in your Post method
@@ -129,7 +133,38 @@ public static class SchedulingModule
                 .FirstOrDefaultAsync(a => a.Id == id);
             return appointment is not null ? Results.Ok(appointment) : Results.NotFound();
         })
+        .RequireAuthorization(HpmsPolicies.ClinicalStaff)
         .WithName("GetAppointment");
+        
+        // Scheduling Summary (For Providers & Front Desk)
+        group.MapGet("/summary/today", async (SchedulingDbContext db, ITenantProvider tenant) =>
+        {
+            var today = DateTime.UtcNow.Date;
+
+            var appointments = await db.Appointments
+                .Where(a => a.StartTime.Date == today)
+                .Select(a => new
+                {
+                    a.Id,
+                    a.PatientId,
+                    a.StartTime,
+                    a.Status,
+                }).ToListAsync();
+
+            return Results.Ok(new
+            {
+                TotalCount = appointments.Count,
+                ArrivedCount = appointments.Count(a => a.Status == AppointmentStatus.Arrived),
+                InSessionCount = appointments.Count(a => a.Status == AppointmentStatus.InSession),
+                CompletedCount = appointments.Count(a => a.Status == AppointmentStatus.Completed),
+                NoShowCount = appointments.Count(a => a.Status == AppointmentStatus.NoShow),
+                CanceledCount = appointments.Count(a => a.Status == AppointmentStatus.Canceled),
+                Queue = appointments.Where(a => a.Status == AppointmentStatus.Arrived)
+                    .OrderBy(a => a.StartTime)
+                    .ToList()
+            });
+        })
+        .RequireAuthorization(HpmsPolicies.ClinicalStaff);
         
         // --- PATIENT ENDPOINTS ---
         
@@ -160,6 +195,7 @@ public static class SchedulingModule
             await db.SaveChangesAsync();
             return Results.Created($"/scheduling/patients/{patient.Id}", patient);
         })
+        .RequireAuthorization(HpmsPolicies.ClinicalStaff)
         .WithName("CreatePatient");
 
         // Get all patients for the current clinic (filtered by TenantId)
@@ -167,6 +203,7 @@ public static class SchedulingModule
         {
             return await db.Patients.ToListAsync();
         })
+        .RequireAuthorization(HpmsPolicies.ClinicalStaff)
         .WithName("GetPatients");
 
         // Soft delete a patient
@@ -180,6 +217,7 @@ public static class SchedulingModule
 
             return Results.NoContent();
         })
+        .RequireAuthorization(HpmsPolicies.ClinicAdminOrAbove)
         .WithName("DeletePatient");
         
         return endpoints;

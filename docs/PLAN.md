@@ -1,94 +1,174 @@
-
----
-
 # Project Development Plan: HPMS
 
 ## Executive Summary
 
-The development of HPMS is divided into five distinct phases. This approach ensures that the foundational multi-tenancy and security layers are established before moving into complex clinical and financial workflows.
+HPMS development is organized into five phases: foundation and multi-tenancy first, then clinical workflows, event-driven billing, financial features, and finally compliance hardening. This ordering ensures tenant isolation and authentication exist before building on top of them.
 
 ---
 
 ## Phase 1: Foundation & Multi-Tenancy
 
-**Goal:** Establish the core infrastructure, tenant isolation, and identity management.
+**Goal:** Core infrastructure, tenant isolation, and identity management.
 
-* **Description:** Implement the `HPMS.Identity` module. This includes the global `Tenants` table and the automated `TenantId` filtering logic.
-* **Key Deliverables:**
-* Database migrations for Tenants, Users, and Roles.
-* JWT Authentication middleware.
-* EF Core Global Query Filters for automated data isolation.
-* Tenant onboarding API (System Admin only).
+**Description:** Implement `HPMS.Modules.Identity` — tenants table, users, roles, and automated `TenantId` filtering.
 
+**Key deliverables:**
 
+* Database migrations for Tenants, Users, and Roles
+* JWT authentication middleware
+* EF Core global query filters for data isolation
+* Tenant onboarding API (System Admin only)
+
+**Progress:** Complete
+
+| Deliverable | Status |
+|-------------|--------|
+| Migrations + seed data | Done |
+| JWT middleware + Swagger | Done |
+| Global query filters | Done |
+| `ClaimsTenantProvider` | Done |
+| Secure tenant onboarding (admin-only) | Done |
+| RBAC on endpoints | Done |
+| Correct role in JWT claims | Done |
 
 ---
 
 ## Phase 2: Scheduling & Patient Management
 
-**Goal:** Build the primary clinical workflow for front-desk and provider staff.
+**Goal:** Primary clinical workflow for front-desk and provider staff.
 
-* **Description:** Implement the `HPMS.Scheduling` module. This phase focuses on patient CRUD operations and the calendar logic required to manage clinic capacity.
-* **Key Deliverables:**
-* Patient Demographic management with AES-256 encryption for PHI.
-* Appointment booking engine with conflict detection (preventing double-booking per `FR-S01`).
-* State machine for appointments (`Scheduled`  `Arrived`  `Completed`).
-* Soft-delete implementation for all clinical records.
+**Description:** Implement `HPMS.Scheduling` — patient CRUD, appointment booking, status state machine.
 
+**Key deliverables:**
 
+* Patient demographics with AES-256 encryption for PHI
+* Appointment booking with conflict detection (FR-S01)
+* State machine: `Scheduled` → `Arrived` → `InSession` → `Completed`
+* Soft-delete for clinical records
+
+**Progress:** ~80% complete
+
+| Deliverable | Status |
+|-------------|--------|
+| Patient CRUD + PHI encryption | Done |
+| Conflict detection service | Done |
+| Status state machine + `Canceled`/`NoShow` | Done |
+| Soft-delete | Done |
+| Today's summary endpoint | Done |
+| Appointment list/calendar API | Not done |
+| Admin double-booking override | Not done |
+| Provider linked to Identity `User` | Not done (bare `Guid`) |
+| Frontend scheduling UI | Not started |
 
 ---
 
 ## Phase 3: Event-Driven Billing Integration
 
-**Goal:** Automate the transition from clinical activity to financial record-keeping.
+**Goal:** Automate clinical-to-financial handoff.
 
-* **Description:** Connect the `Scheduling` and `Billing` modules using MediatR. This phase focuses on the "In-Scope" requirement of automatic invoice generation.
-* **Key Deliverables:**
-* `AppointmentCompletedEvent` definition and publishing logic.
-* Billing Module event handler to catch completed visits.
-* Automatic "Draft" invoice generation based on `AppointmentType` rates.
+**Description:** Connect Scheduling and Billing via MediatR; auto-generate invoices on completed visits.
 
+**Key deliverables:**
 
+* `AppointmentCompletedEvent` definition and publishing
+* Billing handler for completed visits
+* Invoice generation based on AppointmentType rates
+
+**Progress:** ~70% complete
+
+| Deliverable | Status |
+|-------------|--------|
+| Event + MediatR handler | Done |
+| Auto invoice + debit ledger | Done |
+| Integration test (appointment → invoice) | Done |
+| AppointmentType pricing | Not done (hardcoded $150 fee) |
 
 ---
 
 ## Phase 4: Financial Ledger & Payments
 
-**Goal:** Implement a compliant, immutable financial system for clinic revenue.
+**Goal:** Compliant financial system for clinic revenue.
 
-* **Description:** Finalize the `HPMS.Billing` module by building out the double-entry ledger and payment processing UI/API.
-* **Key Deliverables:**
-* Immutable `FinancialLedger` table for auditing.
-* Payment application logic (updating Invoice status to `Paid`).
-* Refund/Void workflow (ensuring no hard deletes of financial data per `FR-B02`).
-* Basic revenue reporting dashboard for Clinic Admins.
+**Description:** Double-entry ledger, payment processing, reporting.
 
+**Key deliverables:**
 
+* Immutable `FinancialLedger` table
+* Payment logic (invoice → `Paid`)
+* Refund/void workflow (FR-B02)
+* Revenue reporting dashboard
+
+**Progress:** ~50% complete
+
+| Deliverable | Status |
+|-------------|--------|
+| Ledger + invoice entities | Done |
+| `POST /billing/invoices/{id}/pay` | Done |
+| Revenue summary API | Done |
+| Refund/void workflow | Not done |
+| Ledger immutability enforcement | Not done |
+| Billing UI + dashboard wired to API | Not done |
 
 ---
 
 ## Phase 5: Compliance, Auditing & Hardening
 
-**Goal:** Ensure the system meets all HIPAA-level non-functional requirements (NFRs).
+**Goal:** Meet HIPAA-level non-functional requirements before MVP launch.
 
-* **Description:** Implement the comprehensive audit logging system and finalize security hardening before the MVP launch.
-* **Key Deliverables:**
-* Automated `AuditLog` interceptor in EF Core (captures Old vs. New values).
-* Performance indexing on `TenantId` and `IsDeleted` columns.
-* Integration tests using Testcontainers to verify tenant data leakage prevention.
-* API Documentation (Swagger/OpenAPI) and Role-Based Access Control (RBAC) final validation.
+**Description:** Audit logging, security hardening, test infrastructure.
 
+**Key deliverables:**
 
+* EF Core `AuditLog` interceptor (old vs. new values)
+* Indexing on `TenantId` and `IsDeleted`
+* Testcontainers for integration tests
+* Swagger/OpenAPI polish + RBAC validation
+
+**Progress:** ~10% complete
+
+| Deliverable | Status |
+|-------------|--------|
+| Swagger in Development | Done |
+| Basic integration tests (SQL Server) | Done |
+| CI pipeline | Done |
+| Audit log table + interceptor | Not done |
+| Testcontainers | Not done |
+| Secrets in vault/env (not source) | Not done |
+| Full RBAC validation | Not done |
+
+---
+
+## Frontend Roadmap (parallel track)
+
+| Milestone | Status |
+|-----------|--------|
+| Login / signup pages | Done |
+| HTTP interceptor (JWT + tenant header) | Done |
+| Shared API config | Done |
+| Dashboard route + auth guard | Not done |
+| Dashboard wired to summary APIs | Not done |
+| App shell / navigation | Not done |
+| Scheduling, patients, billing UIs | Not started |
 
 ---
 
 ## Summary of Phases
 
-| Phase | Focus | Primary Stakeholder |
+| Phase | Focus | Primary stakeholder |
 | --- | --- | --- |
-| **1** | Multi-Tenancy & Auth | System Admin |
-| **2** | Patient Workflows | Front Desk / Provider |
-| **3** | Automation (Events) | System Reliability |
-| **4** | Revenue Management | Billing Manager |
-| **5** | Security & Audit | Compliance Officer |
+| **1** | Multi-tenancy & auth | System Admin |
+| **2** | Patient workflows | Front Desk / Provider |
+| **3** | Automation (events) | System reliability |
+| **4** | Revenue management | Billing Manager |
+| **5** | Security & audit | Compliance officer |
+
+---
+
+## Recommended next steps
+
+1. **Frontend:** Register `/dashboard` route, add auth guard, wire `DashboardService`
+2. **Frontend:** App shell and front-desk appointment booking UI
+3. **Backend:** `GET /scheduling/appointments` list endpoint
+4. **Phase 5:** Audit log interceptor and move encryption/JWT secrets to configuration
+
+See [DEVELOPMENT.md](DEVELOPMENT.md) for running the stack locally and [API.md](API.md) for endpoint details.

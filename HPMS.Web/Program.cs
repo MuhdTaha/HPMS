@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
+using HPMS.Modules.Identity.Authorization;
 using HPMS.Modules.Identity.Data;
 using HPMS.Modules.Identity.Endpoints;
 using HPMS.Modules.Billing.Data;
@@ -72,7 +73,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddAuthorization();
+builder.Services.AddHpmsAuthorization();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {

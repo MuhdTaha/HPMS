@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs';
 import { LoginRequest, LoginResponse, UserRegistrationDto } from './auth.models';
 import { jwtDecode } from 'jwt-decode';
+import { IDENTITY_API_URL } from '../../config/api.config';
 
 interface TenantResponse {
   id: string;
@@ -11,7 +12,7 @@ interface TenantResponse {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:5260/identity';
+  private readonly apiUrl = IDENTITY_API_URL;
 
   login(credentials: LoginRequest) {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials).pipe(
@@ -29,6 +30,25 @@ export class AuthService {
         }
       })
     );
+  }
+
+  // Centralized logic to read the role from the stored JWT
+  getRole(): string | null {
+    // Get the token from localStorage, return null if not found
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+
+    // Decode the token and extract the role claim
+    try {
+      const decoded: any = jwtDecode(token);
+      // Checks both standard JWT 'role' and the specific Microsoft Claim URI
+      return decoded['role'] ||
+        decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ||
+        null;
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      return null;
+    }
   }
 
   // Use this for the "Tenant Onboarding" endpoint

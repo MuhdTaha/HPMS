@@ -35,7 +35,7 @@ export class LoginComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const savedUsername = localStorage.getItem('rememberedUsername');
@@ -47,23 +47,23 @@ export class LoginComponent implements OnInit {
   }
 
   onLogin() {
-	// 1. Initial Guards
+    // 1. Initial Guards
     if (!this.username || !this.password) {
       this.toastService.error('Missing details', 'Enter both username and password before signing in.');
       return;
     }
 
     if (!this.validateUsername() || !this.validatePassword()) {
-        return;
+      return;
     }
 
     this.loading = true;
 
     // 2. Build the login request
     const request: LoginRequest = {
-        username: this.username,
-        password: this.password,
-        rememberMe: this.rememberMe ? true : false
+      username: this.username,
+      password: this.password,
+      rememberMe: this.rememberMe ? true : false
     };
 
     // 3. Execute the login request
@@ -71,9 +71,9 @@ export class LoginComponent implements OnInit {
       next: () => {
         // save username to localStorage if "Remember me" is checked, otherwise remove it
         if (this.rememberMe) {
-            localStorage.setItem('rememberedUsername', this.username);
+          localStorage.setItem('rememberedUsername', this.username);
         } else {
-            localStorage.removeItem('rememberedUsername');
+          localStorage.removeItem('rememberedUsername');
         }
 
         this.loading = false;

@@ -4,7 +4,6 @@ using System.Net.Http.Json;
 using FluentAssertions;
 using HPMS.Modules.Billing.Data;
 using HPMS.Modules.Billing.Entities;
-using HPMS.Modules.Identity.DTO;
 using HPMS.Scheduling.Data;
 using HPMS.Scheduling.Entities;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -98,43 +97,19 @@ public class BillingIntegrationTests(WebApplicationFactory<Program> factory)
         Client.DefaultRequestHeaders.Authorization = null;
     }
 
-    private async Task<TenantResponse> CreateTenantAsync(string name)
+    private async Task<IntegrationAuthHelper.TenantResponse> CreateTenantAsync(string name)
     {
-        var response = await Client.PostAsJsonAsync($"/identity/tenants?name={Uri.EscapeDataString(name)}", new { });
-        response.EnsureSuccessStatusCode();
-
-        var tenant = await response.Content.ReadFromJsonAsync<TenantResponse>();
-        tenant.Should().NotBeNull();
-        return tenant;
+        var systemAdminToken = await IntegrationAuthHelper.LoginAsSystemAdminAsync(Client);
+        return await IntegrationAuthHelper.CreateTenantAsync(Client, name, systemAdminToken);
     }
 
     private async Task RegisterUserAsync(Guid tenantId, string username, string password)
     {
-        var response = await Client.PostAsJsonAsync("/identity/users", new UserRegistrationDto(
-            tenantId,
-            username,
-            $"{username}@example.com",
-            password,
-            RoleId: 2,
-            FirstName: "Billing",
-            LastName: "Test"));
-
-        response.EnsureSuccessStatusCode();
+        var systemAdminToken = await IntegrationAuthHelper.LoginAsSystemAdminAsync(Client);
+        await IntegrationAuthHelper.RegisterUserAsync(Client, tenantId, username, password, systemAdminToken);
+        Client.DefaultRequestHeaders.Authorization = null;
     }
 
-    private async Task<string> LoginAndGetTokenAsync(string username, string password, bool rememberMe = false)
-    {
-        var response = await Client.PostAsJsonAsync("/identity/login", new LoginRequest(username, password,  rememberMe));
-        response.EnsureSuccessStatusCode();
-
-        var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>();
-        loginResponse.Should().NotBeNull();
-        loginResponse.Token.Should().NotBeNullOrWhiteSpace();
-
-        return loginResponse.Token;
-    }
-
-    private sealed record TenantResponse(Guid Id, string Name, bool IsActive, DateTime CreatedAt);
-
-    private sealed record LoginResponse(string Token);
+    private Task<string> LoginAndGetTokenAsync(string username, string password, bool rememberMe = false)
+        => IntegrationAuthHelper.LoginAsync(Client, username, password, rememberMe);
 }

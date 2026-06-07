@@ -1,167 +1,31 @@
 <div class="signup-body">
   <div class="signup-card shadow-8">
     <div class="auth-tabs" role="tablist" aria-label="Authentication pages">
-      <a
-        role="tab"
-        class="auth-tab"
-        routerLink="/login"
-        routerLinkActive="auth-tab-active"
-        [routerLinkActiveOptions]="{ exact: true }"
-      >
+      <a role="tab" class="auth-tab" routerLink="/login" routerLinkActive="auth-tab-active"
+        [routerLinkActiveOptions]="{ exact: true }">
         Login
       </a>
-      <a
-        role="tab"
-        class="auth-tab"
-        routerLink="/signup"
-        routerLinkActive="auth-tab-active"
-        [routerLinkActiveOptions]="{ exact: true }"
-      >
+      <a role="tab" class="auth-tab" routerLink="/signup" routerLinkActive="auth-tab-active"
+        [routerLinkActiveOptions]="{ exact: true }">
         Sign Up
       </a>
     </div>
 
     <div class="signup-header">
       <div class="hpms-logo" aria-hidden="true"></div>
-      <h1 class="signup-title">Create Your Account</h1>
-      <p class="signup-subtitle">Set up your clinic and admin access in one step</p>
+      <h1 class="signup-title">Clinic Onboarding</h1>
+      <p class="signup-subtitle">New clinics are provisioned by an HPMS System Administrator</p>
     </div>
 
-    <form class="signup-form p-fluid" (ngSubmit)="onSignUp()">
-      <div class="signup-grid">
-        <section class="form-section">
-          <div class="section-heading">
-            <h2>Clinic details</h2>
-            <p>Tell us where this account will be used.</p>
-          </div>
+    <div class="signup-form p-fluid">
+      <p class="form-error" style="color: var(--text-color); margin-bottom: 1.5rem;">
+        Public self-registration is disabled. A System Administrator creates the clinic tenant and the first
+        Clinic Admin account. If you already have credentials, sign in below.
+      </p>
 
-          <div class="field-group field-span-2" [class.field-valid]="clinicName.length > 0">
-            <label for="clinicName" class="field-label">Clinic name</label>
-            <input
-              id="clinicName"
-              type="text"
-              pInputText
-              placeholder="Example Health Clinic"
-              [(ngModel)]="clinicName"
-              name="clinicName"
-              class="hpms-input"
-            />
-          </div>
-        </section>
-
-        <section class="form-section">
-          <div class="section-heading">
-            <h2>Admin account</h2>
-            <p>Use the details for the first clinic administrator.</p>
-          </div>
-
-          <div class="field-group" [class.field-valid]="firstName.length > 0">
-            <label for="firstName" class="field-label">First name</label>
-            <input
-              id="firstName"
-              type="text"
-              pInputText
-              placeholder="First name"
-              [(ngModel)]="firstName"
-              name="firstName"
-              class="hpms-input"
-            />
-          </div>
-
-          <div class="field-group" [class.field-valid]="lastName.length > 0">
-            <label for="lastName" class="field-label">Last name</label>
-            <input
-              id="lastName"
-              type="text"
-              pInputText
-              placeholder="Last name"
-              [(ngModel)]="lastName"
-              name="lastName"
-              class="hpms-input"
-            />
-          </div>
-
-          <div class="field-group" [class.field-valid]="emailValid">
-            <label for="email" class="field-label">Email</label>
-            <input
-              id="email"
-              type="email"
-              pInputText
-              placeholder="Email address"
-              [(ngModel)]="email"
-              (ngModelChange)="onEmailChange($event)"
-              name="email"
-              class="hpms-input"
-            />
-            <p class="field-error" *ngIf="emailError">{{ emailError }}</p>
-          </div>
-
-          <div class="field-group username-field" [class.field-valid]="usernameValid">
-            <label for="username" class="field-label">
-              Username
-              <span class="info-icon" tabindex="0" aria-describedby="username-rules">i
-                <span class="tooltip" role="tooltip" id="username-rules">One word, lowercase letters, numbers, or punctuation (no spaces).</span>
-              </span>
-            </label>
-            <input
-              id="username"
-              type="text"
-              pInputText
-              placeholder="Choose a username"
-              [(ngModel)]="username"
-              (ngModelChange)="onUsernameChange($event)"
-              name="username"
-              class="hpms-input"
-            />
-            <p class="field-error" *ngIf="usernameError">{{ usernameError }}</p>
-          </div>
-
-          <div class="field-group" [class.field-valid]="passwordValid">
-            <label for="password" class="field-label">Password</label>
-            <p-password
-              id="password"
-              [(ngModel)]="password"
-              (ngModelChange)="onPasswordChange($event)"
-              name="password"
-              [feedback]="false"
-              [toggleMask]="true"
-              iconDisplay="input"
-              placeholder="Password"
-              styleClass="w-full hpms-password"
-              inputStyleClass="hpms-input"
-            ></p-password>
-            <p class="field-error" *ngIf="passwordError">{{ passwordError }}</p>
-          </div>
-
-          <div class="field-group" [class.field-valid]="confirmPasswordValid">
-            <label for="confirmPassword" class="field-label">Confirm password</label>
-            <p-password
-              id="confirmPassword"
-              [(ngModel)]="confirmPassword"
-              (ngModelChange)="onConfirmPasswordChange($event)"
-              name="confirmPassword"
-              [feedback]="false"
-              [toggleMask]="true"
-              iconDisplay="input"
-              placeholder="Confirm password"
-              styleClass="w-full hpms-password"
-              inputStyleClass="hpms-input"
-            ></p-password>
-            <p class="field-error" *ngIf="confirmPasswordError">{{ confirmPasswordError }}</p>
-          </div>
-        </section>
-      </div>
-
-      @if (errorMessage) {
-        <p class="form-error">{{ errorMessage }}</p>
-      }
-
-      <p-button
-        type="submit"
-        label="Create Account"
-        styleClass="w-full hpms-btn-accent"
-        [loading]="loading"
-      ></p-button>
-    </form>
+      <a routerLink="/login" class="w-full">
+        <p-button type="button" label="Go to Login" styleClass="w-full hpms-btn-accent"></p-button>
+      </a>
+    </div>
   </div>
 </div>

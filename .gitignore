@@ -4,7 +4,13 @@
 .idea/
 *.user
 appsettings.Development.json
-hpms-ui/.vscode/extensions.json
-hpms-ui/.vscode/launch.json
-hpms-ui/.vscode/mcp.json
-hpms-ui/.vscode/tasks.json
+
+# Visual Studio Code
+hpms-ui/.vscode/
+
+# Rider
+hpms-ui/.idea/
+
+# Cursor
+.cursor/
+.cursorignore

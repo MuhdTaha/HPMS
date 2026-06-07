@@ -1,59 +1,84 @@
-# HpmsUi
+# HPMS UI
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.7.
+Angular 21 frontend for the Healthcare Practice Management System. Uses PrimeNG for components and a custom dark theme defined in `src/styles.scss`.
 
-## Development server
+## Prerequisites
 
-To start a local development server, run:
+- Node.js 20+
+- Backend running at http://localhost:5260 (see [../docs/DEVELOPMENT.md](../docs/DEVELOPMENT.md))
 
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Setup
 
 ```bash
-ng generate component component-name
+npm install
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+### Environment
+
+Create or edit `.env` in this directory (local development):
+
+```
+apiUrl=http://localhost:5260/identity
+apiBaseUrl=http://localhost:5260
+```
+
+Values are read in `src/app/core/config/api.config.ts`. Defaults match the above if `.env` is not loaded.
+
+## Development
 
 ```bash
-ng generate --help
+npm start
 ```
 
-## Building
+Open http://localhost:4200
 
-To build the project run:
+## Build & test
 
 ```bash
-ng build
+npm run build    # output: dist/hpms-ui/
+npm test         # Vitest via Angular CLI
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## Project structure
 
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
+```
+src/app/
+├── core/
+│   ├── config/api.config.ts       # API URLs
+│   ├── interceptors/api.interceptor.ts  # JWT + X-Tenant-Id
+│   └── services/
+│       ├── auth/                  # Login, signup API calls
+│       ├── dashboard.service.ts   # Scheduling/billing summaries
+│       └── toast/                 # PrimeNG notifications
+├── features/
+│   ├── auth/login/                # Login page
+│   ├── auth/signup/               # Tenant + user registration
+│   └── dashboard/                 # Role-aware dashboard (WIP)
+├── app.routes.ts
+└── app.config.ts
 ```
 
-## Running end-to-end tests
+## Current status
 
-For end-to-end (e2e) testing, run:
+| Feature | Status |
+|---------|--------|
+| Login | Done |
+| Signup (tenant + user) | Done |
+| Dashboard route | Not registered — login redirects to `/dashboard` which falls through to login |
+| Dashboard API integration | `DashboardService` exists but component does not call it |
+| Auth guards | Not implemented |
+| Scheduling / billing / patients UI | Not started |
 
-```bash
-ng e2e
-```
+See [../docs/PLAN.md](../docs/PLAN.md) for the frontend roadmap.
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## Styling
 
-## Additional Resources
+- Global tokens and PrimeNG overrides: `src/styles.scss`
+- Auth pages: scoped SCSS in `features/auth/*/`
+- PrimeIcons loaded via `angular.json`
+- PrimeFlex is in `package.json` but not yet added to global styles — dashboard layout classes may not apply until configured
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Related docs
+
+- [../docs/DEVELOPMENT.md](../docs/DEVELOPMENT.md) — full stack local setup
+- [../docs/API.md](../docs/API.md) — backend endpoints consumed by services
