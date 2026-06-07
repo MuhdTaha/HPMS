@@ -1,0 +1,72 @@
+<div class="page-card">
+  <div class="page-header">
+    <div>
+      <h2>Appointments</h2>
+      <p>Book visits, review the calendar list, and advance appointment status.</p>
+    </div>
+    <button pButton type="button" label="Refresh" icon="pi pi-refresh" (click)="loadAppointments()"></button>
+  </div>
+
+  <section class="form-panel">
+    <h3>Book appointment</h3>
+    <div class="form-grid">
+      <select [(ngModel)]="form.patientId">
+        <option value="">Select patient</option>
+        @for (patient of patients; track patient.id) {
+          <option [value]="patient.id">{{ patient.firstName }} {{ patient.lastName }}</option>
+        }
+      </select>
+
+      <select [(ngModel)]="form.providerId">
+        <option value="">Select provider</option>
+        @for (provider of providers; track provider.id) {
+          <option [value]="provider.id">{{ provider.firstName }} {{ provider.lastName }}</option>
+        }
+      </select>
+
+      <input pInputText type="date" [(ngModel)]="form.date" />
+      <input pInputText type="time" [(ngModel)]="form.startTime" />
+      <input pInputText type="time" [(ngModel)]="form.endTime" />
+    </div>
+
+    @if (canOverrideBooking) {
+      <label class="override-toggle">
+        <p-checkbox [(ngModel)]="form.forceBooking" [binary]="true"></p-checkbox>
+        <span>Allow double-booking override (Clinic Admin)</span>
+      </label>
+    }
+
+    <button pButton type="button" label="Book appointment" class="hpms-btn-accent" (click)="bookAppointment()"></button>
+  </section>
+
+  <p-table [value]="appointments" [loading]="loading" responsiveLayout="scroll">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Patient</th>
+        <th>Provider</th>
+        <th>Start</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-appointment>
+      <tr>
+        <td>{{ patientName(appointment.patientId) }}</td>
+        <td>{{ providerName(appointment.providerId) }}</td>
+        <td>{{ appointment.startTime | date:'short' }}</td>
+        <td>{{ statusLabel(appointment.status) }}</td>
+        <td class="actions">
+          @if (appointment.status === 1) {
+            <button pButton type="button" label="Check in" class="p-button-text" (click)="advanceStatus(appointment, 2)"></button>
+          }
+          @if (appointment.status === 2) {
+            <button pButton type="button" label="Start visit" class="p-button-text" (click)="advanceStatus(appointment, 3)"></button>
+          }
+          @if (appointment.status === 3) {
+            <button pButton type="button" label="Complete" class="p-button-text" (click)="advanceStatus(appointment, 4)"></button>
+          }
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>

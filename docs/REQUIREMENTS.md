@@ -26,7 +26,7 @@ Roles are seeded in the database (`HPMS.Modules.Identity`). JWT role claims and 
 
 | ID | Requirement | Status |
 |----|-------------|--------|
-| **FR-S01** | Prevent double-booking for a single provider unless explicitly overridden by a Clinic Admin | Partial — conflict service implemented; admin override not implemented |
+| **FR-S01** | Prevent double-booking for a single provider unless explicitly overridden by a Clinic Admin | Done |
 | **FR-S02** | Appointments transition through `Scheduled` → `Arrived` → `InSession` → `Completed` or `NoShow` (also `Canceled`) | Done |
 
 ### Module: Billing
@@ -63,8 +63,8 @@ Summary as of June 2026. See [PLAN.md](PLAN.md) for phase-level detail.
 
 | Area | Done | Remaining |
 |------|------|-----------|
-| Backend API | 16 endpoints across Identity, Scheduling, Billing | Audit logs, refund/void, appointment list |
-| Frontend | Login, signup, auth interceptor | Dashboard route, API wiring, feature pages, auth guards |
+| Backend API | 18 endpoints across Identity, Scheduling, Billing | Audit logs, refund/void |
+| Frontend | Login, signup, auth interceptor, dashboard, patients, appointments | Billing feature pages, auth guards on all private routes |
 | Tests | Unit (conflict, tenant filters) + 3 integration tests | Broader coverage, Testcontainers |
 | Docs | Requirements, design, ERM, API reference | Keep in sync with code changes |
 

@@ -1,0 +1,67 @@
+.app-shell {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+  background: var(--hpms-bg);
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 1.5rem;
+  background: var(--hpms-surface);
+  border-right: 1px solid var(--hpms-border);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  h1 {
+    margin: 0;
+    font-size: 1.25rem;
+  }
+
+  p {
+    margin: 0.25rem 0 0;
+    color: var(--hpms-text-muted);
+    font-size: 0.875rem;
+  }
+}
+
+.hpms-logo {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, var(--hpms-accent), var(--hpms-info));
+}
+
+.nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  a {
+    color: var(--hpms-text-muted);
+    text-decoration: none;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    transition: background 0.2s ease, color 0.2s ease;
+
+    &.active,
+    &:hover {
+      background: var(--hpms-surface-elevated);
+      color: var(--hpms-text);
+    }
+  }
+}
+
+.logout-btn {
+  margin-top: auto;
+}
+
+.content {
+  padding: 1.5rem;
+}

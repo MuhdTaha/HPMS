@@ -14,10 +14,19 @@ public record PatientDto(
 
 // Used when a Front Desk user books a new slot
 public record CreateAppointmentDto(
-    Guid PatientId, 
-    Guid ProviderId, 
-    DateTime StartTime, 
-    DateTime EndTime);
+    Guid PatientId,
+    Guid ProviderId,
+    DateTime StartTime,
+    DateTime EndTime,
+    bool ForceBooking = false);
+
+public record AppointmentListItemDto(
+    Guid Id,
+    Guid PatientId,
+    Guid ProviderId,
+    DateTime StartTime,
+    DateTime EndTime,
+    int Status);
 
 // Used when updating the status (Scheduled -> Arrived -> Completed)
 public record UpdateAppointmentStatusDto(

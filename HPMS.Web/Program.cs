@@ -22,6 +22,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<ITenantProvider, ClaimsTenantProvider>();
+builder.Services.AddScoped<IProviderValidator, IdentityProviderValidator>();
 // builder.Services.AddScoped<ITenantProvider, FakeTenantProvider>();
 
 // Add DbContexts for Identity, Scheduling, and Billing modules, using the same connection string.

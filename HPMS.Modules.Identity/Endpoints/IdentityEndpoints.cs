@@ -12,6 +12,7 @@ using HPMS.Modules.Identity.Data;
 using HPMS.Modules.Identity.DTO;
 using HPMS.Modules.Identity.Entities;
 using HPMS.SharedKernel.Authorization;
+using static HPMS.SharedKernel.Authorization.HpmsRoleIds;
 
 namespace HPMS.Modules.Identity.Endpoints;
 
@@ -66,9 +67,35 @@ public static class IdentityEndpoints
         .RequireAuthorization(HpmsPolicies.ClinicAdminOrAbove)
         .WithName("RegisterUser");
 
-        group.MapGet("/users", async (IdentityDbContext db) => await db.Users.ToListAsync())
+        group.MapGet("/users", async (int? roleId, IdentityDbContext db) =>
+            await db.Users
+                .Include(u => u.Role)
+                .Where(u => roleId == null || u.RoleId == roleId)
+                .Select(u => new UserSummaryDto(
+                    u.Id,
+                    u.Username,
+                    u.FirstName,
+                    u.LastName,
+                    u.RoleId,
+                    u.Role!.Name))
+                .ToListAsync())
             .RequireAuthorization(HpmsPolicies.ClinicAdminOrAbove)
             .WithName("GetUsers");
+
+        group.MapGet("/providers", async (IdentityDbContext db) =>
+            await db.Users
+                .Include(u => u.Role)
+                .Where(u => u.RoleId == Provider)
+                .Select(u => new UserSummaryDto(
+                    u.Id,
+                    u.Username,
+                    u.FirstName,
+                    u.LastName,
+                    u.RoleId,
+                    u.Role!.Name))
+                .ToListAsync())
+            .RequireAuthorization(HpmsPolicies.ClinicalStaff)
+            .WithName("GetProviders");
 
         // --- 3. Login & JWT Generation ---
         group.MapPost("/login", async (LoginRequest request, IdentityDbContext db, IConfiguration config) =>

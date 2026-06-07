@@ -1,0 +1,25 @@
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="hpms-logo" aria-hidden="true"></div>
+      <div>
+        <h1>HPMS</h1>
+        <p>{{ userRole }}</p>
+      </div>
+    </div>
+
+    <nav class="nav-links">
+      <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+      @if (showClinicalNav()) {
+        <a routerLink="/patients" routerLinkActive="active">Patients</a>
+        <a routerLink="/appointments" routerLinkActive="active">Appointments</a>
+      }
+    </nav>
+
+    <button pButton type="button" label="Logout" class="logout-btn" (click)="logout()"></button>
+  </aside>
+
+  <main class="content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

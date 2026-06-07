@@ -1,0 +1,36 @@
+.page-card,
+.form-panel {
+  background: var(--hpms-surface);
+  border: 1px solid var(--hpms-border);
+  border-radius: 1rem;
+  padding: 1.5rem;
+}
+
+.page-header,
+.form-panel {
+  margin-bottom: 1.5rem;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+
+  h2,
+  p {
+    margin: 0;
+  }
+
+  p {
+    color: var(--hpms-text-muted);
+    margin-top: 0.35rem;
+  }
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}

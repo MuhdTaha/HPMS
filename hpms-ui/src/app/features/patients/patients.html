@@ -1,0 +1,39 @@
+<div class="page-card">
+  <div class="page-header">
+    <div>
+      <h2>Patients</h2>
+      <p>Register and review clinic patient demographics.</p>
+    </div>
+    <button pButton type="button" label="Refresh" icon="pi pi-refresh" (click)="loadPatients()"></button>
+  </div>
+
+  <section class="form-panel">
+    <h3>New patient</h3>
+    <div class="form-grid">
+      <input pInputText placeholder="First name" [(ngModel)]="form.firstName" />
+      <input pInputText placeholder="Last name" [(ngModel)]="form.lastName" />
+      <input pInputText type="date" [(ngModel)]="form.dateOfBirth" />
+      <input pInputText placeholder="Email" [(ngModel)]="form.email" />
+      <input pInputText placeholder="Address" [(ngModel)]="form.address" />
+      <input pInputText placeholder="Phone number" [(ngModel)]="form.phoneNumber" />
+    </div>
+    <button pButton type="button" label="Create patient" class="hpms-btn-accent" (click)="createPatient()"></button>
+  </section>
+
+  <p-table [value]="patients" [loading]="loading" responsiveLayout="scroll">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Name</th>
+        <th>Date of birth</th>
+        <th>Patient ID</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-patient>
+      <tr>
+        <td>{{ patient.firstName }} {{ patient.lastName }}</td>
+        <td>{{ patient.dateOfBirth | date:'mediumDate' }}</td>
+        <td>{{ patient.id }}</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>

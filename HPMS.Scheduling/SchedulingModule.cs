@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Security.Claims;
+using System.Text.Json;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -25,43 +26,98 @@ public static class SchedulingModule
         
         // UC-01: Schedule Appointment
         group.MapPost("/appointments", async (
-            CreateAppointmentDto dto, 
-            SchedulingDbContext db, 
+            CreateAppointmentDto dto,
+            SchedulingDbContext db,
             IAppointmentConflictService conflictService,
-            ITenantProvider tenantProvider) =>
+            IProviderValidator providerValidator,
+            ITenantProvider tenantProvider,
+            ClaimsPrincipal caller) =>
         {
-            // 1. Validate Time Logic
             if (dto.StartTime >= dto.EndTime)
                 return Results.BadRequest("End time must be after start time.");
 
-            // 2. Check for double-booking (FR-S01)
-            var isAvailable = await conflictService.IsSlotAvailableAsync(
-                dto.ProviderId, 
-                dto.StartTime, 
-                dto.EndTime);
+            var tenantId = tenantProvider.GetTenantId();
 
-            if (!isAvailable)
-                return Results.Conflict("The provider is already booked for this time slot.");
+            if (!await providerValidator.IsValidProviderAsync(dto.ProviderId, tenantId))
+                return Results.BadRequest("Invalid provider. ProviderId must reference a Provider user in this clinic.");
 
-            // 3. Initialize the Entity
+            var patientExists = await db.Patients
+                .IgnoreQueryFilters()
+                .AnyAsync(p =>
+                    p.Id == dto.PatientId &&
+                    p.TenantId == tenantId &&
+                    !p.IsDeleted);
+
+            if (!patientExists)
+                return Results.BadRequest("Invalid patient ID.");
+
+            var canOverrideConflict = dto.ForceBooking &&
+                (caller.IsInRole(HpmsRoles.ClinicAdmin) || caller.IsInRole(HpmsRoles.SystemAdmin));
+
+            if (!canOverrideConflict)
+            {
+                var isAvailable = await conflictService.IsSlotAvailableAsync(
+                    dto.ProviderId,
+                    dto.StartTime,
+                    dto.EndTime);
+
+                if (!isAvailable)
+                    return Results.Conflict("The provider is already booked for this time slot.");
+            }
+
             var appointment = new Appointment
             {
-                TenantId = tenantProvider.GetTenantId(),
+                TenantId = tenantId,
                 PatientId = dto.PatientId,
                 ProviderId = dto.ProviderId,
                 StartTime = dto.StartTime,
                 EndTime = dto.EndTime,
-                Status = AppointmentStatus.Scheduled // Initial state
+                Status = AppointmentStatus.Scheduled
             };
 
-            // 4. Save to Database
             db.Appointments.Add(appointment);
             await db.SaveChangesAsync();
 
-            // 5. Return the Created Appointment with a Location header
             return Results.CreatedAtRoute("GetAppointment", new { id = appointment.Id }, appointment);
         })
         .RequireAuthorization(HpmsPolicies.SchedulingWrite);
+
+        group.MapGet("/appointments", async (
+            SchedulingDbContext db,
+            Guid? providerId,
+            DateTime? from,
+            DateTime? to,
+            int? status) =>
+        {
+            var query = db.Appointments.AsQueryable();
+
+            if (providerId.HasValue)
+                query = query.Where(a => a.ProviderId == providerId.Value);
+
+            if (from.HasValue)
+                query = query.Where(a => a.StartTime >= from.Value);
+
+            if (to.HasValue)
+                query = query.Where(a => a.StartTime <= to.Value);
+
+            if (status.HasValue)
+                query = query.Where(a => (int)a.Status == status.Value);
+
+            var appointments = await query
+                .OrderBy(a => a.StartTime)
+                .Select(a => new AppointmentListItemDto(
+                    a.Id,
+                    a.PatientId,
+                    a.ProviderId,
+                    a.StartTime,
+                    a.EndTime,
+                    (int)a.Status))
+                .ToListAsync();
+
+            return Results.Ok(appointments);
+        })
+        .RequireAuthorization(HpmsPolicies.ClinicalStaff)
+        .WithName("ListAppointments");
         
         // UC-02: Update Appointment Status (The State Machine)
         group.MapPatch("/appointments/{id:guid}/status", async (

@@ -6,8 +6,8 @@ import { API_BASE_URL } from '../config/api.config';
 export interface DashboardStats {
   totalCount: number;
   arrivedCount: number;
-  pendingNotes: number;
-  queue: any[];
+  inSessionCount: number;
+  queue: Array<{ id: string; patientId: string; startTime: string; status: number }>;
   revenue: {
     today: number;
     chartLabels: string[];
@@ -32,12 +32,12 @@ export class DashboardService {
       map(([sched, bill]) => ({
         totalCount: sched.totalCount,
         arrivedCount: sched.arrivedCount,
-        pendingNotes: sched.pendingNotes,
-        queue: sched.queue,
+        inSessionCount: sched.inSessionCount,
+        queue: sched.queue ?? [],
         revenue: {
           today: bill.todayRevenue,
-          chartLabels: bill.chartLabels,
-          chartValues: bill.chartValues
+          chartLabels: bill.chartLabels ?? [],
+          chartValues: bill.chartValues ?? []
         }
       }))
     );

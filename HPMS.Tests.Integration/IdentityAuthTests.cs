@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace HPMS.Tests.Integration;
 
+[Collection("Integration")]
 public class IdentityAuthTests(WebApplicationFactory<Program> factory) : BaseIntegrationTest(factory)
 {
     [Fact]

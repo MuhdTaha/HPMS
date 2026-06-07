@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace HPMS.Tests.Integration;
 
+[Collection("Integration")]
 public class BillingIntegrationTests(WebApplicationFactory<Program> factory) 
     : BaseIntegrationTest(factory)
 {

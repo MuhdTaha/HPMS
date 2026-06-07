@@ -46,7 +46,7 @@ HPMS development is organized into five phases: foundation and multi-tenancy fir
 * State machine: `Scheduled` → `Arrived` → `InSession` → `Completed`
 * Soft-delete for clinical records
 
-**Progress:** ~80% complete
+**Progress:** Complete
 
 | Deliverable | Status |
 |-------------|--------|
@@ -55,10 +55,10 @@ HPMS development is organized into five phases: foundation and multi-tenancy fir
 | Status state machine + `Canceled`/`NoShow` | Done |
 | Soft-delete | Done |
 | Today's summary endpoint | Done |
-| Appointment list/calendar API | Not done |
-| Admin double-booking override | Not done |
-| Provider linked to Identity `User` | Not done (bare `Guid`) |
-| Frontend scheduling UI | Not started |
+| Appointment list/calendar API | Done |
+| Admin double-booking override | Done |
+| Provider linked to Identity `User` | Done |
+| Frontend scheduling UI | Done |
 
 ---
 
@@ -145,10 +145,10 @@ HPMS development is organized into five phases: foundation and multi-tenancy fir
 | Login / signup pages | Done |
 | HTTP interceptor (JWT + tenant header) | Done |
 | Shared API config | Done |
-| Dashboard route + auth guard | Not done |
-| Dashboard wired to summary APIs | Not done |
-| App shell / navigation | Not done |
-| Scheduling, patients, billing UIs | Not started |
+| Dashboard route + auth guard | Done |
+| Dashboard wired to summary APIs | Done |
+| App shell / navigation | Done |
+| Scheduling, patients, billing UIs | Scheduling + patients done; billing UI deferred to Phase 4 |
 
 ---
 
@@ -166,9 +166,8 @@ HPMS development is organized into five phases: foundation and multi-tenancy fir
 
 ## Recommended next steps
 
-1. **Frontend:** Register `/dashboard` route, add auth guard, wire `DashboardService`
-2. **Frontend:** App shell and front-desk appointment booking UI
-3. **Backend:** `GET /scheduling/appointments` list endpoint
-4. **Phase 5:** Audit log interceptor and move encryption/JWT secrets to configuration
+1. **Phase 3:** AppointmentType pricing instead of hardcoded visit fee
+2. **Phase 4:** Billing UI + refund/void workflow
+3. **Phase 5:** Audit log interceptor and move encryption/JWT secrets to configuration
 
 See [DEVELOPMENT.md](DEVELOPMENT.md) for running the stack locally and [API.md](API.md) for endpoint details.

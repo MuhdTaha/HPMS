@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace HPMS.Tests.Integration;
 
+[Collection("Integration")]
 public class PatientIsolationTests(WebApplicationFactory<Program> factory) : BaseIntegrationTest(factory)
 {
     [Fact]

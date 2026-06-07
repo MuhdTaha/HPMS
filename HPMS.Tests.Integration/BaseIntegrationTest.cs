@@ -5,7 +5,7 @@ using HPMS.Scheduling.Data;
 
 namespace HPMS.Tests.Integration;
 
-public abstract class BaseIntegrationTest : IClassFixture<WebApplicationFactory<Program>>
+public abstract class BaseIntegrationTest : IClassFixture<WebApplicationFactory<Program>>, IAsyncLifetime
 {
     protected readonly HttpClient Client;
     protected readonly WebApplicationFactory<Program> Factory;
@@ -15,6 +15,20 @@ public abstract class BaseIntegrationTest : IClassFixture<WebApplicationFactory<
         Factory = factory;
         Client = factory.CreateClient();
     }
+
+    public Task InitializeAsync()
+    {
+        Client.DefaultRequestHeaders.Authorization = null;
+        return Task.CompletedTask;
+    }
+
+    public Task DisposeAsync()
+    {
+        Client.DefaultRequestHeaders.Authorization = null;
+        return Task.CompletedTask;
+    }
+
+    protected void ClearClientAuth() => Client.DefaultRequestHeaders.Authorization = null;
 
     // Helper to get a Database Context inside a test
     protected T GetService<T>() where T : notnull 

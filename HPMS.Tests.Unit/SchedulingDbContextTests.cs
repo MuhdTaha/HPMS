@@ -3,27 +3,23 @@ using HPMS.Scheduling.Data;
 using HPMS.Scheduling.Entities;
 using HPMS.SharedKernel.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Moq;
-
 namespace HPMS.Tests.Unit;
 
 public class SchedulingDbContextTests
 {
     private readonly SchedulingDbContext _context;
-    private readonly Guid _testTenantId = Guid.NewGuid();
+    private readonly TestTenantProvider _tenantProvider = new();
+    private readonly Guid _testTenantId;
 
     public SchedulingDbContextTests()
     {
-        // Setup In-Memory DB
+        _testTenantId = _tenantProvider.TenantId;
+
         var options = new DbContextOptionsBuilder<SchedulingDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
-        // Mock the Provider to return our specific test tenant
-        var mockTenantProvider = new Mock<ITenantProvider>();
-        mockTenantProvider.Setup(x => x.GetTenantId()).Returns(_testTenantId);
-
-        _context = new SchedulingDbContext(options, mockTenantProvider.Object);
+        _context = new SchedulingDbContext(options, _tenantProvider);
     }
 
     [Fact]
@@ -35,7 +31,7 @@ public class SchedulingDbContextTests
             ProviderId = Guid.NewGuid(),
             StartTime = DateTime.UtcNow,
             EndTime = DateTime.UtcNow.AddMinutes(30),
-            RowVersion = Guid.NewGuid().ToByteArray()
+            RowVersion = new byte[8]
             // Note: TenantId is NOT set here
         };
 
@@ -60,7 +56,7 @@ public class SchedulingDbContextTests
         {
             TenantId = otherTenantId,
             ProviderId = Guid.NewGuid(),
-            RowVersion = Guid.NewGuid().ToByteArray()
+            RowVersion = new byte[8]
         };
 
         _context.Appointments.Add(secretAppointment);
@@ -83,7 +79,7 @@ public class SchedulingDbContextTests
             TenantId = _testTenantId,
             IsDeleted = true,
             ProviderId = Guid.NewGuid(),
-            RowVersion = Guid.NewGuid().ToByteArray()
+            RowVersion = new byte[8]
         };
 
         _context.Appointments.Add(deletedAppointment);

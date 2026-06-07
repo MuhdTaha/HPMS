@@ -1,0 +1,37 @@
+.dashboard-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.card {
+  background: var(--hpms-surface);
+  border: 1px solid var(--hpms-border);
+  color: var(--hpms-text);
+}
+
+.stat-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.schedule-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.schedule-item {
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--hpms-border);
+}
+
+.customer-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+}
+
+.status-arrived {
+  background: rgba(85, 240, 181, 0.15);
+  color: var(--hpms-accent);
+}

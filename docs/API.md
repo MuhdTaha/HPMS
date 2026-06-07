@@ -41,7 +41,8 @@ The frontend also sends `X-Tenant-Id` from `localStorage`; tenant scoping is enf
 |--------|-------|------|-------------|
 | POST | `/identity/tenants?name={name}` | SystemAdmin | Create a new clinic tenant |
 | POST | `/identity/users` | ClinicAdmin, SystemAdmin | Register a user (BCrypt password hash) |
-| GET | `/identity/users` | ClinicAdmin, SystemAdmin | List users for current tenant |
+| GET | `/identity/users` | ClinicAdmin, SystemAdmin | List users for current tenant (`roleId` optional) |
+| GET | `/identity/providers` | ClinicalStaff | List provider users for current tenant |
 | POST | `/identity/login` | No | Authenticate; returns `{ "token": "..." }` |
 
 ### POST /identity/users — request body
@@ -80,7 +81,8 @@ All routes require JWT.
 
 | Method | Route | Description |
 |--------|-------|-------------|
-| POST | `/scheduling/appointments` | Create appointment (conflict check) |
+| POST | `/scheduling/appointments` | Create appointment (conflict check; optional `forceBooking` for Clinic Admin) |
+| GET | `/scheduling/appointments` | List appointments (`providerId`, `from`, `to`, `status` query filters) |
 | PATCH | `/scheduling/appointments/{id}/status` | Update status (state machine) |
 | DELETE | `/scheduling/appointments/{id}` | Soft-delete appointment |
 | GET | `/scheduling/appointments/{id}` | Get appointment by ID |
@@ -88,6 +90,20 @@ All routes require JWT.
 | POST | `/scheduling/patients` | Create patient (PHI encrypted at rest) |
 | GET | `/scheduling/patients` | List patients (tenant-scoped) |
 | DELETE | `/scheduling/patients/{id}` | Soft-delete patient |
+
+### POST /scheduling/appointments — request body
+
+```json
+{
+  "patientId": "guid",
+  "providerId": "guid",
+  "startTime": "2026-06-06T09:00:00Z",
+  "endTime": "2026-06-06T10:00:00Z",
+  "forceBooking": false
+}
+```
+
+`providerId` must reference an Identity `User` with the Provider role in the current tenant. Set `forceBooking` to `true` to bypass conflict detection when the caller is a Clinic Admin or System Admin.
 
 ### Appointment status transitions
 

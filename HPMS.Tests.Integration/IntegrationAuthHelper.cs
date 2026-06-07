@@ -12,6 +12,8 @@ internal static class IntegrationAuthHelper
 
     internal static async Task<string> LoginAsync(HttpClient client, string username, string password, bool rememberMe = true)
     {
+        client.DefaultRequestHeaders.Authorization = null;
+
         var response = await client.PostAsJsonAsync("/identity/login", new LoginRequest(username, password, rememberMe));
         response.EnsureSuccessStatusCode();
 

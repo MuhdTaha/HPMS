@@ -4,31 +4,23 @@ using HPMS.Scheduling.Data;
 using HPMS.Scheduling.Entities;
 using HPMS.Scheduling.Services;
 using Microsoft.EntityFrameworkCore;
-using Moq;
-using HPMS.SharedKernel.Interfaces;
-
 namespace HPMS.Tests.Unit;
 
 public class AppointmentConflictServiceTests
 {
     private readonly SchedulingDbContext _context;
     private readonly AppointmentConflictService _service;
-    // Keep tenant constant across test instances because EF Core caches model/query filters per context type.
-    private static readonly Guid _testTenantId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+    private static readonly TestTenantProvider TenantProvider = new();
+    private static readonly Guid TestTenantId = TenantProvider.TenantId;
 
     public AppointmentConflictServiceTests()
     {
-        // 1. Setup an In-Memory Database for isolation
         var options = new DbContextOptionsBuilder<SchedulingDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
-        // 2. Mock the Tenant Provider (Assume Tenant ID is always the same for this test)
-        var mockTenantProvider = new Mock<ITenantProvider>();
-        mockTenantProvider.Setup(x => x.GetTenantId()).Returns(_testTenantId);
-
-        _context = new SchedulingDbContext(options, mockTenantProvider.Object);
-        _service = new AppointmentConflictService(_context);
+        _context = new SchedulingDbContext(options, TenantProvider);
+        _service = new AppointmentConflictService(_context, TenantProvider);
     }
 
     [Fact]
@@ -40,12 +32,12 @@ public class AppointmentConflictServiceTests
 
         _context.Appointments.Add(new Appointment
         {
-            TenantId = _testTenantId,
+            TenantId = TestTenantId,
             ProviderId = providerId,
             StartTime = baseTime,
             EndTime = baseTime.AddHours(1), // 10:00 - 11:00
             Status = AppointmentStatus.Scheduled,
-            RowVersion = Guid.NewGuid().ToByteArray()
+            RowVersion = new byte[8]
         });
         await _context.SaveChangesAsync();
 
@@ -68,11 +60,12 @@ public class AppointmentConflictServiceTests
 
         _context.Appointments.Add(new Appointment
         {
+            TenantId = TestTenantId,
             ProviderId = providerId,
             StartTime = baseTime,
             EndTime = baseTime.AddHours(1), // 10:00 - 11:00
             Status = AppointmentStatus.Scheduled,
-            RowVersion = Guid.NewGuid().ToByteArray()
+            RowVersion = new byte[8]
         });
         await _context.SaveChangesAsync();
 
@@ -95,12 +88,12 @@ public class AppointmentConflictServiceTests
 
         _context.Appointments.Add(new Appointment
         {
-            TenantId = _testTenantId,
+            TenantId = TestTenantId,
             ProviderId = providerId,
             StartTime = baseTime,
             EndTime = baseTime.AddMinutes(30), // 10:00 - 10:30 AM
             Status = AppointmentStatus.Scheduled,
-            RowVersion = Guid.NewGuid().ToByteArray()
+            RowVersion = new byte[8]
         });
         await _context.SaveChangesAsync();
         
@@ -124,12 +117,12 @@ public class AppointmentConflictServiceTests
 
         _context.Appointments.Add(new Appointment
         {
-            TenantId = _testTenantId,
+            TenantId = TestTenantId,
             ProviderId = providerId,
             StartTime = baseTime,
             EndTime = baseTime.AddHours(1),
             Status = AppointmentStatus.Canceled, // Logic should ignore this
-            RowVersion = Guid.NewGuid().ToByteArray()
+            RowVersion = new byte[8]
         });
         await _context.SaveChangesAsync();
 
@@ -149,12 +142,12 @@ public class AppointmentConflictServiceTests
 
         _context.Appointments.Add(new Appointment
         {
-            TenantId = _testTenantId,
+            TenantId = TestTenantId,
             ProviderId = providerId,
             StartTime = baseTime.AddMinutes(30), // 9:30
             EndTime = baseTime.AddMinutes(45),   // 9:45
             Status = AppointmentStatus.Scheduled,
-            RowVersion = Guid.NewGuid().ToByteArray()
+            RowVersion = new byte[8]
         });
         await _context.SaveChangesAsync();
 
@@ -175,7 +168,7 @@ public class AppointmentConflictServiceTests
 
         _context.Appointments.Add(new Appointment
         {
-            TenantId = _testTenantId,
+            TenantId = TestTenantId,
             ProviderId = doctor1,
             StartTime = baseTime,
             EndTime = baseTime.AddHours(1),
